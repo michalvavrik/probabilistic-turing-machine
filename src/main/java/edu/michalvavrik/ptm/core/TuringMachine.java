@@ -3,25 +3,27 @@ package edu.michalvavrik.ptm.core;
 import java.util.HashSet;
 import java.util.Set;
 
-public interface ProbabilisticTuringMachine {
+public interface TuringMachine {
 
     /**
      * Special symbol used to swipe alphabet. We consider untouched tape parts to be blank symbols.
      */
-    String BLANK = "#";
+    char BLANK = '#';
 
-    void compute(char[] inputData);
+    char[] compute(char[] inputData);
 
-    final class ProbabilisticTuringMachineBuilder {
+    final class TuringMachineBuilder {
 
-        private final Set<String> inputAlphabet = new HashSet<>();
-        private final Set<String> finalStates = new HashSet<>();
-        private final Set<String> specialSymbols = new HashSet<>();
-        private TransitionFunction transitionFunction;
-        private String initialState;
+        private final Set<Character> inputAlphabet = new HashSet<>();
+        private final Set<Character> finalStates = new HashSet<>();
+        private final Set<Character> specialSymbols = new HashSet<>();
+        private final Set<Character> states = new HashSet<>();
+        private TransitionFunction transitionFunction = null;
+        private char initialState;
 
-        public ProbabilisticTuringMachine build() {
-            return new ProbabilisticTuringMachineImpl(transitionFunction, inputAlphabet, initialState, finalStates, specialSymbols);
+        public TuringMachine build() {
+            return new TuringMachineImpl(transitionFunction, inputAlphabet, initialState, finalStates, specialSymbols,
+                    states);
         }
     }
 }
