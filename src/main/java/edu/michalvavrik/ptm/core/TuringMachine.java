@@ -75,9 +75,57 @@ public interface TuringMachine {
         private TransitionFunction transitionFunction = null;
         private char initialState;
 
+        public void addState(char state) {
+            states.add(state);
+        }
+
+        public void addFinalState(char state) {
+            finalStates.add(state);
+        }
+
+        public void transitionFunction(TransitionFunction transitionFunction) {
+            this.transitionFunction = transitionFunction;
+        }
+
+        public void initialState(char initialState) {
+            this.initialState = initialState;
+        }
+
+        public void addInputAlphabetSymbol(char symbol) {
+            inputAlphabet.add(symbol);
+        }
+
+        public void specialSymbols(Set<Character> specialSymbols) {
+            this.specialSymbols.addAll(specialSymbols);
+        }
+
         public TuringMachine build() {
             return new TuringMachineImpl(transitionFunction, inputAlphabet, initialState, finalStates, specialSymbols,
                     states);
+        }
+
+        public Set<Character> getInputAlphabet() {
+            return Set.copyOf(inputAlphabet);
+        }
+
+        public Set<Character> getFinalStates() {
+            return Set.copyOf(finalStates);
+        }
+
+        public Set<Character> getSpecialSymbols() {
+            return Set.copyOf(specialSymbols);
+        }
+
+        public Set<Character> getStates() {
+            return Set.copyOf(states);
+        }
+
+        public char getInitialState() {
+            return initialState;
+        }
+
+        public TransitionFunction getTransitionFunction() {
+            return transitionFunction;
         }
     }
 }

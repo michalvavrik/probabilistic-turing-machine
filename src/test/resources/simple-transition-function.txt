@@ -1,0 +1,14 @@
+# Rewrite 'aaaaa' to 'bbbbb;'
+δ : A × a → A × b × R
+δ : A × # → B × ; × N
+
+# Rewrite 'bbbbb;' to 'ccccc;'
+δ : B × ; → B × ; × L
+δ : B × b → B × c × L
+δ : B × # → C × c × N
+
+# this step is ignored
+δ : B × - → D × c × N
+
+special-symbols , - ; @ .
+initial-state A
