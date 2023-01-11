@@ -1,7 +1,9 @@
 package edu.michalvavrik.ptm.core;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -12,13 +14,16 @@ final class TuringMachineImpl implements TuringMachine {
     private final TransitionFunction transitionFunction;
 
     private final Set<Character> tapeAlphabet;
+
     private final Set<Character> inputAlphabet;
 
     /**
      * Set of final states or accepting states.
      */
     private final Set<Character> finalStates;
+
     private final Set<Character> states;
+
     private final char initialState;
 
     TuringMachineImpl(TransitionFunction transitionFunction, Set<Character> inputAlphabet, char initialState,
@@ -75,7 +80,7 @@ final class TuringMachineImpl implements TuringMachine {
     }
 
     @Override
-    public char[] compute(char[] inputData) {
+    public Configuration[] compute(char[] inputData) {
         // validate input data
         if (inputData == null || inputData.length == 0) {
             throw new IllegalArgumentException("Input data were not provided");
@@ -87,9 +92,11 @@ final class TuringMachineImpl implements TuringMachine {
         }
 
         // tape is used as a memory
-        char[] tape = growTapeOnRight(inputData);
+        char[] tape = Arrays.copyOf(inputData, inputData.length);
         int tapeHead = 0;
         char currentState = initialState;
+        final List<Configuration> configurations = new ArrayList<>();
+        configurations.add(new Configuration(tape, currentState));
 
         // process input
         while (!finalStates.contains(currentState)) {
@@ -121,15 +128,18 @@ final class TuringMachineImpl implements TuringMachine {
                 case RIGHT -> ++tapeHead;
             }
 
-            // ensure we can write to tape next time
+            // ensure we can write to the tape next time
             if (tape.length == tapeHead) {
                 tape = growTapeOnRight(tape);
             } else if (tapeHead < 0) {
                 tape = growTapeOnLeft(tape);
             }
+
+            // record configuration
+            configurations.add(new Configuration(tape, currentState));
         }
 
-        return tape;
+        return configurations.toArray(new Configuration[0]);
     }
 
     static char[] growTapeOnRight(char[] oldTape) {

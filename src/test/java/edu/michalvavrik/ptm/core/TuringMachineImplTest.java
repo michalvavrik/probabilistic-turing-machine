@@ -45,8 +45,7 @@ public class TuringMachineImplTest {
                 'a','b','c', 'd','e', 'f', 'g', 'h', 'i','j','k', 'l'), 'a', Set.of('b', 'm'), Set.of('@'),
                 Set.of('a','b','c', 'd','e', 'f', 'g', 'h', 'i','j','k', 'l', 'm'));
         var result = tm.compute("1,2,3,4,5,6,7,8,9,0".toCharArray());
-        // cut blank symbols
-        var resultStr = new String(result).replace(Character.toString(TuringMachine.BLANK), "");
+        var resultStr = new String(result[result.length - 1].tape());
         Assertions.assertEquals("c@d@e@f@g@h@i@j@k@l", resultStr);
     }
 
