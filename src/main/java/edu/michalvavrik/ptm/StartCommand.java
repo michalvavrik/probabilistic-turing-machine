@@ -9,13 +9,13 @@ import picocli.CommandLine.Command;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static edu.michalvavrik.ptm.core.TuringMachine.ANY;
 import static edu.michalvavrik.ptm.core.TuringMachine.BLANK;
 import static java.lang.String.format;
 
@@ -25,6 +25,30 @@ public class StartCommand implements Runnable {
     private static final Logger LOG = Logger.getLogger(StartCommand.class);
     String inputData;
     final TuringMachineBuilder turingMachineBuilder = new TuringMachineBuilder();
+
+    @CommandLine.Option(names = {"--additional-input-alphabet-symbols"}, description = """
+            Comma separated list of additional input alphabet symbols.
+            
+            Input alphabet symbols are auto-detected as symbols used by transition function not explicitly marked as
+            special symbols. This option allows you to define additional symbols that can't be detected from the rules.
+            That is useful mainly when you have the rule to match ANY character.
+            """)
+    public void setAdditionalInputAlphabetSymbols(String symbols) throws IOException {
+        for (String symbol : symbols.split(",")) {
+            symbol = symbol.trim();
+            if (symbol.length() != 1) {
+                throw new IllegalArgumentException("Input alphabet symbol must be exactly one character");
+            }
+            final char symbolChar = symbol.charAt(0);
+            if (symbolChar == ANY) {
+                throw new IllegalArgumentException(String.format("Input alphabet must not contain '%s' symbol", ANY));
+            }
+            if (symbolChar == BLANK) {
+                throw new IllegalArgumentException(String.format("Input alphabet must not contain '%s' symbol", BLANK));
+            }
+            turingMachineBuilder.addInputAlphabetSymbol(symbolChar);
+        }
+    }
 
     @CommandLine.Option(names = {"--input-file-path", "-ip"})
     public void setInputDataPath(String path) throws IOException {
@@ -84,6 +108,14 @@ public class StartCommand implements Runnable {
             
             Imported subroutines are parsed identically as are lines in the main (this) file. It's simply an option to
             re-use transition rules at multiple places.
+            
+            Sometimes you need to match any character, in such case you can use special symbol '−'. For example when you
+            want to reach the right-most non-blank symbols, you can do:
+
+            δ : A × − → A × − × R
+            # more concrete match has priority
+            δ : A × # → B × # × L
+            
             """)
     public void setTransitionFunction(String path) throws IOException {
         final List<String> transitionRules = Files.readAllLines(Path.of(path));
@@ -184,7 +216,11 @@ public class StartCommand implements Runnable {
 
             @Override
             public Action project(char state, char symbol) {
-                return transitionMap.get(new From(state, symbol));
+                var action = transitionMap.get(new From(state, symbol));
+                if (action == null) {
+                    action = transitionMap.get(new From(state, ANY));
+                }
+                return action;
             }
         };
         turingMachineBuilder.transitionFunction(fun);
@@ -258,6 +294,7 @@ public class StartCommand implements Runnable {
             }
         })
                 .filter(symbol -> symbol != BLANK)
+                .filter(symbol -> symbol != ANY)
                 .forEach(turingMachineBuilder::addInputAlphabetSymbol);
     }
 

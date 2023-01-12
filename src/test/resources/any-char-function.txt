@@ -1,0 +1,5 @@
+# Rewrite 'abcdefgh' to 'bbbbbbbb'
+δ : A × − → A × b × R
+δ : A × # → B × # × N
+
+initial-state A

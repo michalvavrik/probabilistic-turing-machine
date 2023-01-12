@@ -36,10 +36,18 @@ final class TuringMachineImpl implements TuringMachine {
             throw new IllegalArgumentException(String.format("Input alphabet must not contain blank symbol '%s'",
                     BLANK));
         }
+        if (inputAlphabet.contains(ANY)) {
+            throw new IllegalArgumentException(String.format("Input alphabet must not contain blank symbol '%s'",
+                    ANY));
+        }
         if (specialSymbols != null && !specialSymbols.isEmpty()) {
             if (specialSymbols.contains(BLANK)) {
                 throw new IllegalArgumentException(String.format("Special symbols must not contain blank symbol '%s'",
                         BLANK));
+            }
+            if (specialSymbols.contains(ANY)) {
+                throw new IllegalArgumentException(String.format("Special symbols must not contain any symbol '%s'",
+                        ANY));
             }
             if (specialSymbols.stream().anyMatch(inputAlphabet::contains)) {
                 throw new IllegalArgumentException("Special symbols and input alphabet must not overlay");
@@ -85,9 +93,10 @@ final class TuringMachineImpl implements TuringMachine {
         if (inputData == null || inputData.length == 0) {
             throw new IllegalArgumentException("Input data were not provided");
         }
-        for (char inputDatum : inputData) {
-            if (!inputAlphabet.contains(inputDatum)) {
-                throw new IllegalArgumentException("Symbol '%' does not belong to the input alphabet");
+        for (char symbol : inputData) {
+            if (!inputAlphabet.contains(symbol)) {
+                throw new IllegalArgumentException(String.format("Symbol '%s' does not belong to the input alphabet",
+                        symbol));
             }
         }
 

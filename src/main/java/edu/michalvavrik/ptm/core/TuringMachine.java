@@ -7,9 +7,14 @@ import java.util.Set;
 public interface TuringMachine {
 
     /**
-     * Special symbol used to swipe alphabet. We consider untouched tape parts to be blank symbols.
+     * Special symbol used to swipe symbols. We consider untouched tape parts to be blank symbols.
      */
     char BLANK = '#';
+
+    /**
+     * Special symbol used to match any symbol.
+     */
+    char ANY = '−';
 
     record Configuration(char[] tape, char state) {
 

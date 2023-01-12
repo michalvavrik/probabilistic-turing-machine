@@ -29,6 +29,19 @@ public class StartCommandTest {
         validateParsingResult(cmd);
     }
 
+    @Test
+    void testAnyChar() throws IOException {
+        final var cmd = new StartCommand();
+        cmd.setAdditionalInputAlphabetSymbols("a,c,d,e,f,g,h");
+        cmd.setTransitionFunction("src/test/resources/any-char-function.txt");
+        final var inputData = new char[]{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
+        final var turingMachine = cmd.turingMachineBuilder.build();
+        final var configurations = turingMachine.compute(inputData);
+        final var actual = configurations[configurations.length - 1].tape();
+        final var expected = new char[]{'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b'};
+        Assertions.assertArrayEquals(expected, actual);
+    }
+
     private static void validateParsingResult(StartCommand cmd) {
         Assertions.assertEquals('A', cmd.turingMachineBuilder.getInitialState());
         Assertions.assertEquals(2, cmd.turingMachineBuilder.getFinalStates().size());
