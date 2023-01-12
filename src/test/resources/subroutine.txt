@@ -1,0 +1,6 @@
+# Rewrite 'bbbbb;' to 'ccccc;'
+δ : B × ; → B × ; × L
+δ : B × b → B × c × L
+δ : B × # → C × c × N
+
+import-subroutine src/test/resources/nested-subroutine.txt

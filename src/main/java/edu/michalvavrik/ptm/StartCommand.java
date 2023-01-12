@@ -1,16 +1,15 @@
 package edu.michalvavrik.ptm;
 
 import edu.michalvavrik.ptm.core.TransitionFunction;
-import edu.michalvavrik.ptm.core.TransitionFunction.Move;
-import edu.michalvavrik.ptm.core.TuringMachine;
 import edu.michalvavrik.ptm.core.TuringMachine.TuringMachineBuilder;
+import org.jboss.logging.Logger;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -18,16 +17,23 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static edu.michalvavrik.ptm.core.TuringMachine.BLANK;
+import static java.lang.String.format;
 
 @Command(name = "turing-machine", mixinStandardHelpOptions = true)
 public class StartCommand implements Runnable {
 
+    private static final Logger LOG = Logger.getLogger(StartCommand.class);
     String inputData;
     final TuringMachineBuilder turingMachineBuilder = new TuringMachineBuilder();
 
-    @CommandLine.Option(names = {"--input-file-path", "-in"})
-    public void setInputData(String path) throws IOException {
+    @CommandLine.Option(names = {"--input-file-path", "-ip"})
+    public void setInputDataPath(String path) throws IOException {
         inputData = Files.readString(Path.of(path));
+    }
+
+    @CommandLine.Option(names = {"--input-data", "-in"})
+    public void setInputData(String inputData) {
+        this.inputData = inputData;
     }
 
     @CommandLine.Option(names = {"--transition-function-file-path", "-tf"}, description = """
@@ -42,7 +48,7 @@ public class StartCommand implements Runnable {
             Γ - a symbol from the tape alphabet; Γ element must be a single character
             {L, R, N } - is direction (left, right, neutral [AKA do not move]}
 
-            There must be maximum number of one transition rule per line, white spaces and lines that does not start 
+            There must be maximum number of one transition rule per line, white spaces and lines that does not start
             with a character 'δ' are ignored. See an example below:
             
             # Rewrite 'aaaaa' to 'bbbbb;'
@@ -54,8 +60,8 @@ public class StartCommand implements Runnable {
             δ : B × b → B × c × L
             δ : B × # → C × c × N
             
-            Please bear in mind that '×' and '→' must not be part of the tape alphabet.
-            The symbol '#' is used to mark the blank symbol.
+            Please bear in mind that '×' (multiplication sign) and '→' (arrow U+2192) must not be part of the tape 
+            alphabet. The symbol '#' is used to mark the blank symbol.
             
             Be default Q, F, Γ elements state are auto-detected from transition function rules, that is final states are
             are states only found on the right side of the '→' and so on. The initial state can't be auto-detected, so
@@ -69,10 +75,52 @@ public class StartCommand implements Runnable {
             special-symbols , - ; @ .
             
             Parsed special symbols will be ',' ,'-', ';', '@' and '.'.
+            
+            Divide and conquer - many very complicated tasks can be reduced to subroutines of a Turing machine.
+            The subroutine is a small set of states in the Turing machine that performs a small computation. You can
+            like this:
+            
+            import-subroutine src/main/resources/plus-subroutine.txt
+            
+            Imported subroutines are parsed identically as are lines in the main (this) file. It's simply an option to
+            re-use transition rules at multiple places.
             """)
     public void setTransitionFunction(String path) throws IOException {
         final List<String> transitionRules = Files.readAllLines(Path.of(path));
-        parseTransitionRules(transitionRules);
+        List<List<String>> subroutines = importSubroutines(transitionRules);
+        if (subroutines.isEmpty()) {
+            parseTransitionRules(transitionRules);
+        } else {
+            // prepend subroutines prior to transition rules
+            parseTransitionRules(
+                    Stream.concat(subroutines.stream().flatMap(List::stream), transitionRules.stream()).toList()
+            );
+        }
+    }
+
+    private List<List<String>> importSubroutines(List<String> transitionRules) {
+        return transitionRules
+                .stream()
+                .filter(line -> line.startsWith("import-subroutine "))
+                .map(line -> line.replace("import-subroutine ", "").trim())
+                .map(path -> {
+                    try {
+                        return Files.readAllLines(Path.of(path));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .map(subroutineLines -> {
+                    var nestedSubroutines = importSubroutines(subroutineLines);
+                    if (nestedSubroutines.isEmpty()) {
+                        return subroutineLines;
+                    } else {
+                        // append nested subroutines to the end of the file
+                        return Stream.concat(
+                                subroutineLines.stream(), nestedSubroutines.stream().flatMap(List::stream)).toList();
+                    }
+                })
+                .toList();
     }
 
     private void parseTransitionRules(List<String> transitionRules) {
@@ -102,7 +150,7 @@ public class StartCommand implements Runnable {
                             case "L" -> Move.LEFT;
                             case "R" -> Move.RIGHT;
                             default -> throw new RuntimeException(
-                                    String.format("'%s' is not a valid move, accepted values are L, R, N", move));
+                                    format("'%s' is not a valid move, accepted values are L, R, N", move));
                         };
                     }
 
@@ -148,7 +196,7 @@ public class StartCommand implements Runnable {
                 .map(line -> line.replace("initial-state ", "").trim())
                 .peek(state -> {
                     if (state.length() != 1) {
-                        throw new RuntimeException(String.format("Initial state must be exactly one character, got '%s'",
+                        throw new RuntimeException(format("Initial state must be exactly one character, got '%s'",
                                 state));
                     }
                 })
@@ -180,7 +228,7 @@ public class StartCommand implements Runnable {
                 .peek(symbol -> {
                     if (symbol.length() != 1) {
                         throw new RuntimeException(
-                                String.format("Special symbol must be exactly one character, but was '%s'", symbol));
+                                format("Special symbol must be exactly one character, but was '%s'", symbol));
                     }
                 })
                 .map(symbol -> symbol.charAt(0))
@@ -195,16 +243,18 @@ public class StartCommand implements Runnable {
 
         // extract input alphabet
         fun.transitionMap.entrySet().stream().<Character>mapMulti((entry, consumer) -> {
+            final char fromSymbol = entry.getKey().fromSymbol();
+            final char toSymbol = entry.getValue().symbol();
             if (hasSpecialSymbols) {
-                if (!specialSymbols.contains(entry.getKey().fromSymbol())) {
-                    consumer.accept(entry.getKey().fromSymbol());
+                if (!specialSymbols.contains(fromSymbol)) {
+                    consumer.accept(fromSymbol);
                 }
-                if (!specialSymbols.contains(entry.getValue().symbol())) {
-                    consumer.accept(entry.getValue().symbol());
+                if (!specialSymbols.contains(toSymbol)) {
+                    consumer.accept(toSymbol);
                 }
             } else {
-                consumer.accept(entry.getKey().fromSymbol());
-                consumer.accept(entry.getValue().symbol());
+                consumer.accept(fromSymbol);
+                consumer.accept(toSymbol);
             }
         })
                 .filter(symbol -> symbol != BLANK)
@@ -215,6 +265,14 @@ public class StartCommand implements Runnable {
     public void run() {
         Objects.requireNonNull(inputData);
         final var turingMachine = turingMachineBuilder.build();
-        final var result = turingMachine.compute(inputData.trim().toCharArray());
+        final var configurations = turingMachine.compute(inputData.trim().toCharArray());
+
+        // print out all configuration
+        LOG.info("Configurations:");
+        for (int i = 0; i < configurations.length; i++) {
+            var configuration = configurations[i];
+            LOG.info(format("#%d. state '%s', tape: %s", i, configuration.state(), new String(configuration.tape())));
+        }
+        // FIXME count complexity as we know exact number of steps
     }
 }

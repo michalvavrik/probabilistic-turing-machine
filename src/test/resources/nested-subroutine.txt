@@ -1,0 +1,5 @@
+# this step is ignored
+δ : B × - → D × c × N
+
+special-symbols , - ; @ .
+initial-state A

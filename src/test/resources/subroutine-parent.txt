@@ -1,0 +1,5 @@
+# Rewrite 'aaaaa' to 'bbbbb;'
+δ : A × a → A × b × R
+δ : A × # → B × ; × N
+
+import-subroutine src/test/resources/subroutine.txt

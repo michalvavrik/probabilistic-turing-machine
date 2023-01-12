@@ -11,7 +11,7 @@ public class StartCommandTest {
     @Test
     void testInputDataSet() throws IOException {
         final var cmd = new StartCommand();
-        cmd.setInputData("src/test/resources/simple-input-data.txt");
+        cmd.setInputDataPath("src/test/resources/simple-input-data.txt");
         Assertions.assertEquals("abcdefghijklmnopqrstuvwxyz", cmd.inputData);
     }
 
@@ -19,8 +19,17 @@ public class StartCommandTest {
     void testTransitionFunctionParsing() throws IOException {
         final var cmd = new StartCommand();
         cmd.setTransitionFunction("src/test/resources/simple-transition-function.txt");
+        validateParsingResult(cmd);
+    }
 
-        // validate parsing result
+    @Test
+    void testSubroutineParsing() throws IOException {
+        final var cmd = new StartCommand();
+        cmd.setTransitionFunction("src/test/resources/subroutine-parent.txt");
+        validateParsingResult(cmd);
+    }
+
+    private static void validateParsingResult(StartCommand cmd) {
         Assertions.assertEquals('A', cmd.turingMachineBuilder.getInitialState());
         Assertions.assertEquals(2, cmd.turingMachineBuilder.getFinalStates().size());
         Assertions.assertTrue(cmd.turingMachineBuilder.getFinalStates().stream().anyMatch(state -> state == 'C'));
