@@ -26,7 +26,7 @@ public class MultiplicationTest {
         final var cmd = new StartCommand();
         cmd.converseDecimalToBinary = true;
         cmd.setTransitionFunction("src/test/resources/multiplication-test.txt");
-        cmd.setInputData(String.format("%s#%s", left, right)); // 22 * 10
+        cmd.setInputData(String.format("%s*%s", left, right)); // 22 * 10
         final var configurations = cmd.computeInputData();
         final long actual = Long.parseLong(new String(configurations[configurations.length - 1].tape()), 2);
         final long expected = left * right;

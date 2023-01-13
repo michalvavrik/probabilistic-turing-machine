@@ -1,11 +1,13 @@
 # Binary arithmetic - multiplication operation
+# inspired by https://math.hws.edu/eck/js/turing-machine/TM-info.html
+# this algorithm requires space on the left
 
-# go to the right-most symbol
+# replace multiplication mark with blank symbol
 δ : « × − → « × − × R
-δ : « × # → ¬ × # × R
-# this one can be removed and ^^ changed to the L and state changed to *
-δ : ¬ × # → * × # × L
+δ : « × * → ¬ × # × R
+# go to the right-most symbol
 δ : ¬ × − → ¬ × − × R
+δ : ¬ × # → * × # × L
 
 # start computing
 δ : * × # → ª × # × L
