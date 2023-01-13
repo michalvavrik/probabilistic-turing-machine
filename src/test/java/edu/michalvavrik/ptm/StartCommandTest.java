@@ -42,6 +42,15 @@ public class StartCommandTest {
         Assertions.assertArrayEquals(expected, actual);
     }
 
+    @Test
+    void testDecimalToBinary() {
+        // detect decimal numbers in string and convert them to binary numbers
+        String str = "22#10";
+        String actual = StartCommand.decimalToBinary(str.toCharArray());
+        String expected = "10110#1010";
+        Assertions.assertEquals(expected, actual);
+    }
+
     private static void validateParsingResult(StartCommand cmd) {
         Assertions.assertEquals('A', cmd.turingMachineBuilder.getInitialState());
         Assertions.assertEquals(2, cmd.turingMachineBuilder.getFinalStates().size());

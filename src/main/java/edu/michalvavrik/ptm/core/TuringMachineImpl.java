@@ -1,5 +1,8 @@
 package edu.michalvavrik.ptm.core;
 
+import edu.michalvavrik.ptm.StartCommand;
+import org.jboss.logging.Logger;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -7,8 +10,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import static java.lang.String.format;
+
 final class TuringMachineImpl implements TuringMachine {
 
+    private static final Logger LOG = Logger.getLogger(TuringMachineImpl.class);
     private static final float LOAD_FACTOR = 1.75f;
 
     private final TransitionFunction transitionFunction;
@@ -83,6 +89,7 @@ final class TuringMachineImpl implements TuringMachine {
         Set<Character> tapeAlphabetList = new HashSet<>(inputAlphabet);
         tapeAlphabetList.addAll(specialSymbols);
         tapeAlphabetList.add(BLANK);
+        tapeAlphabetList.add(ANY);
         this.tapeAlphabet = Set.copyOf(tapeAlphabetList);
         this.inputAlphabet = Set.copyOf(inputAlphabet);
     }
@@ -94,10 +101,10 @@ final class TuringMachineImpl implements TuringMachine {
             throw new IllegalArgumentException("Input data were not provided");
         }
         for (char symbol : inputData) {
-            if (!inputAlphabet.contains(symbol)) {
-                throw new IllegalArgumentException(String.format("Symbol '%s' does not belong to the input alphabet",
-                        symbol));
-            }
+//            if (!inputAlphabet.contains(symbol)) {
+//                throw new IllegalArgumentException(String.format("Symbol '%s' does not belong to the input alphabet",
+//                        symbol));
+//            }
         }
 
         // tape is used as a memory
@@ -110,21 +117,26 @@ final class TuringMachineImpl implements TuringMachine {
         // process input
         while (!finalStates.contains(currentState)) {
             // take this action, e.g. move the tape head, rewrite current symbol, change state
-            var action = transitionFunction.project(currentState, tape[tapeHead]);
+            final var action = transitionFunction.project(currentState, tape[tapeHead]);
 
             // validate resulting action
             if (action == null) {
-                throw new IllegalStateException("Transition function returned empty action");
+                printOutConfigurations(configurations);
+                throw new IllegalStateException(String.format("Transition function returned empty action for state '%s' " +
+                        "and symbol '%s'", currentState, tape[tapeHead]));
             }
             if (action.move() == null) {
+                printOutConfigurations(configurations);
                 throw new IllegalStateException("'Move' must not be null");
             }
             if (!states.contains(action.state())) {
+                printOutConfigurations(configurations);
                 throw new IllegalStateException(String.format("State '%s' is not a valid state", action.state()));
             }
             if (!tapeAlphabet.contains(action.symbol())) {
+                printOutConfigurations(configurations);
                 throw new IllegalStateException(String.format("Symbol '%s' is not a valid tape alphabet symbol",
-                        action.state()));
+                        action.symbol()));
             }
 
             currentState = action.state();
@@ -141,14 +153,27 @@ final class TuringMachineImpl implements TuringMachine {
             if (tape.length == tapeHead) {
                 tape = growTapeOnRight(tape);
             } else if (tapeHead < 0) {
+                final int preLength = tape.length;
                 tape = growTapeOnLeft(tape);
+                final int numberOfAddedElements = tape.length - preLength;
+                // keep head position on the exactly same symbol
+                tapeHead += numberOfAddedElements;
             }
 
             // record configuration
-            configurations.add(new Configuration(tape, currentState));
+            configurations.add(new Configuration(Arrays.copyOf(tape, tape.length), currentState));
         }
 
         return configurations.toArray(new Configuration[0]);
+    }
+
+    private static void printOutConfigurations(List<Configuration> configurations) {
+        if (LOG.isDebugEnabled()) {
+            for (int i = 0; i < configurations.size(); i++) {
+                var configuration = configurations.get(i);
+                LOG.debug(format("#%d. state '%s', tape: %s", i, configuration.state(), new String(configuration.tape())));
+            }
+        }
     }
 
     static char[] growTapeOnRight(char[] oldTape) {

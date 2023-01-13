@@ -1,0 +1,3 @@
+initial-state «
+
+import-subroutine src/main/resources/subroutines/multiplication.txt

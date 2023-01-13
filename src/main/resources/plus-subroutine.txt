@@ -1,2 +1,0 @@
-# Detect plus
-δ : + × a → A × b × R

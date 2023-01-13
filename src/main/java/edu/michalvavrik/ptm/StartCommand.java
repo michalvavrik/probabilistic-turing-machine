@@ -1,6 +1,7 @@
 package edu.michalvavrik.ptm;
 
 import edu.michalvavrik.ptm.core.TransitionFunction;
+import edu.michalvavrik.ptm.core.TuringMachine;
 import edu.michalvavrik.ptm.core.TuringMachine.TuringMachineBuilder;
 import org.jboss.logging.Logger;
 import picocli.CommandLine;
@@ -9,9 +10,12 @@ import picocli.CommandLine.Command;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -22,9 +26,14 @@ import static java.lang.String.format;
 @Command(name = "turing-machine", mixinStandardHelpOptions = true)
 public class StartCommand implements Runnable {
 
+    private static final Pattern NUMBER_PATTERN = Pattern.compile("\\d");
     private static final Logger LOG = Logger.getLogger(StartCommand.class);
     String inputData;
     final TuringMachineBuilder turingMachineBuilder = new TuringMachineBuilder();
+
+    @CommandLine.Option(names = {"--binary-mode"}, description = "Detect all decimal numbers and converse them to binary",
+            defaultValue = "yes")
+    boolean converseDecimalToBinary;
 
     @CommandLine.Option(names = {"--additional-input-alphabet-symbols"}, description = """
             Comma separated list of additional input alphabet symbols.
@@ -219,6 +228,10 @@ public class StartCommand implements Runnable {
                 var action = transitionMap.get(new From(state, symbol));
                 if (action == null) {
                     action = transitionMap.get(new From(state, ANY));
+                    if (action != null && action.symbol() == ANY) {
+                        // if we are transiting to ANY, we want to keep previous symbol
+                        action = new Action(action.state(), symbol, action.move());
+                    }
                 }
                 return action;
             }
@@ -300,9 +313,7 @@ public class StartCommand implements Runnable {
 
     @Override
     public void run() {
-        Objects.requireNonNull(inputData);
-        final var turingMachine = turingMachineBuilder.build();
-        final var configurations = turingMachine.compute(inputData.trim().toCharArray());
+        final TuringMachine.Configuration[] configurations = computeInputData();
 
         // print out all configuration
         LOG.info("Configurations:");
@@ -311,5 +322,68 @@ public class StartCommand implements Runnable {
             LOG.info(format("#%d. state '%s', tape: %s", i, configuration.state(), new String(configuration.tape())));
         }
         // FIXME count complexity as we know exact number of steps
+    }
+
+    TuringMachine.Configuration[] computeInputData() {
+        Objects.requireNonNull(inputData);
+        inputData = inputData.trim();
+        final var turingMachine = turingMachineBuilder.build();
+        final TuringMachine.Configuration[] configurations;
+
+        // if string contains digits and conversion is enabled, converse them to binary numbers
+        if (converseDecimalToBinary && NUMBER_PATTERN.matcher(inputData).find()) {
+
+            configurations = turingMachine.compute(decimalToBinary(inputData.toCharArray()).toCharArray());
+        } else {
+
+            configurations = turingMachine.compute(inputData.toCharArray());
+        }
+
+        return configurations;
+    }
+
+    static String decimalToBinary(char[] charArr) {
+        StringBuilder conversed = new StringBuilder();
+        int digitStart = -1;
+        for (int i = 0; i < charArr.length; i++) {
+            if (Character.isDigit(charArr[i])) {
+                if (digitStart == -1) {
+                    digitStart = i;
+                }
+            } else if (digitStart != -1) {
+                digitStart = addBinaryNumber(charArr, conversed, digitStart, i);
+            } else {
+                conversed.append(charArr[i]);
+            }
+        }
+
+        // handle remainder
+        if (digitStart != -1) {
+            addBinaryNumber(charArr, conversed, digitStart, charArr.length);
+        }
+
+        return conversed.toString();
+    }
+
+    private static int addBinaryNumber(char[] charArr, StringBuilder conversed, int digitStart, int i) {
+        // converse decimal to binary number
+        StringBuilder digitAsStr = new StringBuilder();
+        for (int j = digitStart; j < i; j++) {
+            digitAsStr.append(charArr[j]);
+        }
+        String binaryNumber = Long.toBinaryString(Long.parseLong(digitAsStr.toString()));
+        // add decimal number as binary
+        conversed.append(binaryNumber);
+
+        // reset
+        digitStart = -1;
+
+        // append current char if there is any
+        // the condition is false when this is the last char of the string
+        if (i < charArr.length) {
+            conversed.append(charArr[i]);
+        }
+
+        return digitStart;
     }
 }

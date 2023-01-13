@@ -1,0 +1,4 @@
+# Apply
+
+# Go to the left-most symbol; when subroutine finishes, it is supposed to end in state †
+δ : † × − → † × − × L
