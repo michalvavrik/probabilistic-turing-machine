@@ -89,6 +89,7 @@ final class TuringMachineImpl implements TuringMachine {
         tapeAlphabetList.addAll(specialSymbols);
         tapeAlphabetList.add(BLANK);
         tapeAlphabetList.add(ANY);
+        tapeAlphabetList.add(' ');
         this.tapeAlphabet = Set.copyOf(tapeAlphabetList);
         this.inputAlphabet = Set.copyOf(inputAlphabet);
     }

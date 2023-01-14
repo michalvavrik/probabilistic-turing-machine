@@ -315,12 +315,6 @@ public class StartCommand implements Runnable {
     public void run() {
         final TuringMachine.Configuration[] configurations = computeInputData();
 
-        // print out all configuration
-        LOG.info("Configurations:");
-        for (int i = 0; i < configurations.length; i++) {
-            var configuration = configurations[i];
-            LOG.info(format("#%d. state '%s', tape: %s", i, configuration.state(), new String(configuration.tape())));
-        }
         // FIXME count complexity as we know exact number of steps
     }
 

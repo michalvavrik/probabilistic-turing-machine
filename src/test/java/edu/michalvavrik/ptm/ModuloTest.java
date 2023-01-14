@@ -11,7 +11,7 @@ public class ModuloTest {
 
     @Test
     void testBinaryMultiplication() throws IOException {
-        multiplyAndVerify(5, 2);
+//        multiplyAndVerify(5, 2);
 //        multiplyAndVerify(10, 22);
 //        multiplyAndVerify(1, 1);
 //        multiplyAndVerify(0, 0);
@@ -22,13 +22,23 @@ public class ModuloTest {
 //        multiplyAndVerify(2358966, 6482231);
 //        multiplyAndVerify(752, 74396);
 //        multiplyAndVerify(999989898, 998879876);
+
+        final var cmd = new StartCommand();
+        cmd.converseDecimalToBinary = false;
+        cmd.setTransitionFunction("src/test/resources/division-test.txt");
+        var inputData = "101#010";
+        cmd.setInputData(inputData);
+        final var configurations = cmd.computeInputData();
+        final long actual = Long.parseLong(new String(configurations[configurations.length - 1].tape()), 2);
+        final long expected = 2;
+        Assertions.assertEquals(expected, actual);
     }
 
     private void multiplyAndVerify(long dividend, long divisor) throws IOException {
         final var cmd = new StartCommand();
         cmd.converseDecimalToBinary = true;
         cmd.setTransitionFunction("src/test/resources/division-test.txt");
-        var inputData = dividend + "_" + divisor;
+        var inputData = dividend + "B" + divisor;
         cmd.setInputData(inputData);
         final var configurations = cmd.computeInputData();
         final long actual = Long.parseLong(new String(configurations[configurations.length - 1].tape()), 2);
