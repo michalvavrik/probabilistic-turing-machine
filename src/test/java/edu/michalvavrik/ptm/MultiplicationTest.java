@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public class MultiplicationTest {
 
@@ -20,16 +22,18 @@ public class MultiplicationTest {
         multiplyAndVerify(2358966, 6482231);
         multiplyAndVerify(752, 74396);
         multiplyAndVerify(999989898, 998879876);
+//        multiplyAndVerify(5, 5, 5);
     }
 
-    private void multiplyAndVerify(long left, long right) throws IOException {
+    private void multiplyAndVerify(long... products) throws IOException {
         final var cmd = new StartCommand();
         cmd.converseDecimalToBinary = true;
         cmd.setTransitionFunction("src/test/resources/multiplication-test.txt");
-        cmd.setInputData(String.format("%s*%s", left, right)); // 22 * 10
+        var inputData = Arrays.stream(products).mapToObj(Long::toString).collect(Collectors.joining("*"));
+        cmd.setInputData(inputData);
         final var configurations = cmd.computeInputData();
         final long actual = Long.parseLong(new String(configurations[configurations.length - 1].tape()), 2);
-        final long expected = left * right;
+        final long expected = Arrays.stream(products).reduce(1, (p1, p2) -> p1 * p2);
         Assertions.assertEquals(expected, actual);
     }
 

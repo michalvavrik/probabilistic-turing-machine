@@ -1,6 +1,5 @@
 package edu.michalvavrik.ptm.core;
 
-import edu.michalvavrik.ptm.StartCommand;
 import org.jboss.logging.Logger;
 
 import java.util.ArrayList;
@@ -112,29 +111,28 @@ final class TuringMachineImpl implements TuringMachine {
         int tapeHead = 0;
         char currentState = initialState;
         final List<Configuration> configurations = new ArrayList<>();
-        configurations.add(new Configuration(tape, currentState));
+        final var initialConfiguration = new Configuration(tape, currentState);
+        printOutConfiguration(initialConfiguration);
+        configurations.add(initialConfiguration);
 
         // process input
         while (!finalStates.contains(currentState)) {
+
             // take this action, e.g. move the tape head, rewrite current symbol, change state
             final var action = transitionFunction.project(currentState, tape[tapeHead]);
 
             // validate resulting action
             if (action == null) {
-                printOutConfigurations(configurations);
                 throw new IllegalStateException(String.format("Transition function returned empty action for state '%s' " +
                         "and symbol '%s'", currentState, tape[tapeHead]));
             }
             if (action.move() == null) {
-                printOutConfigurations(configurations);
                 throw new IllegalStateException("'Move' must not be null");
             }
             if (!states.contains(action.state())) {
-                printOutConfigurations(configurations);
                 throw new IllegalStateException(String.format("State '%s' is not a valid state", action.state()));
             }
             if (!tapeAlphabet.contains(action.symbol())) {
-                printOutConfigurations(configurations);
                 throw new IllegalStateException(String.format("Symbol '%s' is not a valid tape alphabet symbol",
                         action.symbol()));
             }
@@ -161,18 +159,17 @@ final class TuringMachineImpl implements TuringMachine {
             }
 
             // record configuration
-            configurations.add(new Configuration(Arrays.copyOf(tape, tape.length), currentState));
+            final var configuration = new Configuration(Arrays.copyOf(tape, tape.length), currentState);
+            printOutConfiguration(configuration);
+            configurations.add(configuration);
         }
 
         return configurations.toArray(new Configuration[0]);
     }
 
-    private static void printOutConfigurations(List<Configuration> configurations) {
+    private static void printOutConfiguration(Configuration configuration) {
         if (LOG.isDebugEnabled()) {
-            for (int i = 0; i < configurations.size(); i++) {
-                var configuration = configurations.get(i);
-                LOG.debug(format("#%d. state '%s', tape: %s", i, configuration.state(), new String(configuration.tape())));
-            }
+            LOG.debug(format("Configuration: state '%s', tape: %s", configuration.state(), new String(configuration.tape())));
         }
     }
 
