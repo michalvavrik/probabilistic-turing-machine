@@ -9,7 +9,7 @@ import java.io.IOException;
 public class DivisionTest {
 
     @Test
-    void testBinaryMultiplication() throws IOException {
+    void testBinaryDivision() throws IOException {
         divideAndVerify(5, 2);
         divideAndVerify(22, 10);
         divideAndVerify(5, 1);

@@ -1,0 +1,14 @@
+# Binary arithmetic - modulo operation
+
+import-subroutine src/main/resources/subroutines/division.txt
+
+# go left and delete division result so that only remainder is left
+δ : Ø × − → Ø × − × L
+δ : Ø × # → Ù × # × L
+δ : Ù × # → Ú × # × L
+δ : Ù × 1 → Ú × # × L
+δ : Ù × 0 → Ú × # × L
+δ : Ú × 1 → Ú × # × L
+δ : Ú × 0 → Ú × # × L
+# now that division result is deleted, finish computation
+δ : Ú × − → h × − × R

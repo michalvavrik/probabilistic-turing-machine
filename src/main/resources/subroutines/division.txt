@@ -1,4 +1,4 @@
-# Binary arithmetic - modulo operation
+# Binary arithmetic - division operation with remainder
 # adjusted version of the https://github.com/Rishabhkandoi/Binary-Division-Turing-Machine/blob/master/TOCBFINAL.pdf
 
 δ : Ö × − → Ö × − × R
