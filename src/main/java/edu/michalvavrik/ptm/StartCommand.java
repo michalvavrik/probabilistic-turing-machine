@@ -10,11 +10,10 @@ import picocli.CommandLine.Command;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -337,6 +336,8 @@ public class StartCommand implements Runnable {
     }
 
     static String decimalToBinary(char[] charArr) {
+        AtomicInteger maxBinaryNumberLength = new AtomicInteger(0);
+
         StringBuilder conversed = new StringBuilder();
         int digitStart = -1;
         for (int i = 0; i < charArr.length; i++) {
@@ -345,7 +346,7 @@ public class StartCommand implements Runnable {
                     digitStart = i;
                 }
             } else if (digitStart != -1) {
-                digitStart = addBinaryNumber(charArr, conversed, digitStart, i);
+                digitStart = addBinaryNumber(charArr, conversed, digitStart, i, maxBinaryNumberLength);
             } else {
                 conversed.append(charArr[i]);
             }
@@ -353,13 +354,13 @@ public class StartCommand implements Runnable {
 
         // handle remainder
         if (digitStart != -1) {
-            addBinaryNumber(charArr, conversed, digitStart, charArr.length);
+            addBinaryNumber(charArr, conversed, digitStart, charArr.length, maxBinaryNumberLength);
         }
 
         return conversed.toString();
     }
 
-    private static int addBinaryNumber(char[] charArr, StringBuilder conversed, int digitStart, int i) {
+    private static int addBinaryNumber(char[] charArr, StringBuilder conversed, int digitStart, int i, AtomicInteger maxBinaryNumberLength) {
         // converse decimal to binary number
         StringBuilder digitAsStr = new StringBuilder();
         for (int j = digitStart; j < i; j++) {
@@ -367,7 +368,25 @@ public class StartCommand implements Runnable {
         }
         String binaryNumber = Long.toBinaryString(Long.parseLong(digitAsStr.toString()));
         // add decimal number as binary
-        conversed.append(binaryNumber);
+        if (maxBinaryNumberLength.get() == 0) {
+            conversed.append(binaryNumber);
+            maxBinaryNumberLength.set(binaryNumber.length());
+        } else {
+            // this is primitive mechanism to ensure binary numbers are going to be of same length,
+            // but it only works as long as the left-most number is the largest one
+            // it's here in order to assure division (tests) works
+            if (maxBinaryNumberLength.get() > binaryNumber.length()) {
+
+                // here we add extra zero: max binary number length - this binary number length
+                final var extraZeros =  "0".repeat(maxBinaryNumberLength.get() - binaryNumber.length());
+                conversed.append(extraZeros);
+
+                conversed.append(binaryNumber);
+            } else {
+                maxBinaryNumberLength.set(binaryNumber.length());
+                conversed.append(binaryNumber);
+            }
+        }
 
         // reset
         digitStart = -1;

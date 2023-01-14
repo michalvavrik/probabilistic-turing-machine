@@ -47,7 +47,7 @@ public class StartCommandTest {
         // detect decimal numbers in string and convert them to binary numbers
         String str = "22#10";
         String actual = StartCommand.decimalToBinary(str.toCharArray());
-        String expected = "10110#1010";
+        String expected = "10110#01010";
         Assertions.assertEquals(expected, actual);
     }
 
