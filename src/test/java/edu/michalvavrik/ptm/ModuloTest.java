@@ -9,14 +9,14 @@ public class ModuloTest {
 
     @Test
     void testBinaryModulo() throws IOException {
-        moduloAndVerify(5, 2);
-        moduloAndVerify(22, 10);
+        moduloAndVerify(9, 5);
+        moduloAndVerify(16, 7);
+        moduloAndVerify(8, 3);
+        moduloAndVerify(754, 138);
+        moduloAndVerify(657, 2);
         moduloAndVerify(5, 1);
-        moduloAndVerify(500, 250);
-        moduloAndVerify(589, 6);
-        moduloAndVerify(12678, 63);
-        moduloAndVerify(12678, 6);
-        moduloAndVerify(12678, 999);
+        moduloAndVerify(7823, 5756);
+        moduloAndVerify(546, 74);
     }
 
     private void moduloAndVerify(int dividend, int divisor) throws IOException {

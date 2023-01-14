@@ -85,13 +85,13 @@ final class TuringMachineImpl implements TuringMachine {
         this.initialState = initialState;
         this.transitionFunction = Objects.requireNonNull(transitionFunction);
         this.finalStates = Set.copyOf(finalStates);
-        Set<Character> tapeAlphabetList = new HashSet<>(inputAlphabet);
+        Set<Character> inputAlphabetList = new HashSet<>(inputAlphabet);
+        inputAlphabetList.add(BLANK);
+        this.inputAlphabet = Set.copyOf(inputAlphabetList);
+        Set<Character> tapeAlphabetList = new HashSet<>(inputAlphabetList);
         tapeAlphabetList.addAll(specialSymbols);
-        tapeAlphabetList.add(BLANK);
         tapeAlphabetList.add(ANY);
-        tapeAlphabetList.add(' ');
         this.tapeAlphabet = Set.copyOf(tapeAlphabetList);
-        this.inputAlphabet = Set.copyOf(inputAlphabet);
     }
 
     @Override
@@ -101,10 +101,10 @@ final class TuringMachineImpl implements TuringMachine {
             throw new IllegalArgumentException("Input data were not provided");
         }
         for (char symbol : inputData) {
-//            if (!inputAlphabet.contains(symbol)) {
-//                throw new IllegalArgumentException(String.format("Symbol '%s' does not belong to the input alphabet",
-//                        symbol));
-//            }
+            if (!inputAlphabet.contains(symbol)) {
+                throw new IllegalArgumentException(String.format("Symbol '%s' does not belong to the input alphabet",
+                        symbol));
+            }
         }
 
         // tape is used as a memory
