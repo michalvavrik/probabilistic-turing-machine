@@ -175,8 +175,14 @@ final class TuringMachineImpl implements TuringMachine {
     }
 
     static char[] growTapeOnRight(char[] oldTape) {
-        // reallocate new space on the right so that we don't have to create new array with every new item
-        final char[] newTape = Arrays.copyOf(oldTape, (int)(oldTape.length * LOAD_FACTOR));
+        final char[] newTape;
+        if (oldTape.length == 1) {
+            // special handling for single item array as load factor * 1 will result in 1 (int casting == round down)
+            newTape = Arrays.copyOf(oldTape, 5);
+        } else {
+            // reallocate new space on the right so that we don't have to create new array with every new item
+            newTape = Arrays.copyOf(oldTape, (int) (oldTape.length * LOAD_FACTOR));
+        }
         // empty tape consist of blank symbols
         Arrays.fill(newTape, oldTape.length, newTape.length, BLANK);
         return newTape;

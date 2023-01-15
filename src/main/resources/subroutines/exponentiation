@@ -1,0 +1,10 @@
+# Binary arithmetic - Exponentiation operation
+
+import-subroutine src/main/resources/subroutines/multiplication.txt
+
+# at this point, we expect products separated with the blank symbol and ended with the semi-colon
+# examples: either 5*5#; or 5*5#*5#*5;
+# we start compute from the left and count on the semi-colon
+
+# go to the right and
+δ : Û × − → Û × − × R

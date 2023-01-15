@@ -1,0 +1,18 @@
+# Binary arithmetic - unsigned decrement operation
+# loosely based on https://www.cs.princeton.edu/courses/archive/fall13/cos126/lectures/18-Turing-2x2.pdf
+
+# start on the right-most digit
+δ : Û × 1 → Ý × 1 × R
+δ : Ý × 1 → Ý × 1 × R
+δ : Ý × 0 → Ý × 0 × R
+δ : Ý × − → Þ × − × L
+
+# if the number is zero, we do not decrement (strictly unsigned operation)
+δ : Û × 0 → Û × 0 × R
+# Ü is exit state
+δ : Û × − → Ü × − × N
+
+# we are on the right, let's decrement
+δ : Þ × 0 → Þ × 1 × L
+# exit
+δ : Þ × 1 → Ü × 0 × L
