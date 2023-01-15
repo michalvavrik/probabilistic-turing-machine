@@ -1,0 +1,60 @@
+# Copy binary number
+
+# expects to start on the first 1 or 0 symbol from the left
+# first symbol different to 0 or 1 is considered to be a separator
+# f.e. #10100##### -> #10100#10100 and #10100^### -> 10100^10100####
+
+# replace 1 with x and 0 with y
+δ : ß × 1 → ß × x × R
+δ : ß × 0 → ß × y × R
+
+# we reached separator
+δ : ß × − → à × − × L
+
+# go the left again
+δ : à × x → à × x × L
+δ : à × y → à × y × L
+
+# we reached left end again (hurrah)
+δ : à × − → á × − × R
+
+# so state 'â' mean we want to copy 0 and state 'ã' means we want to copy 1
+δ : á × x → ã × 1 × R
+δ : á × y → â × 0 × R
+
+# copy 0
+# first go to the separator again
+δ : â × x → â × x × R
+δ : â × y → â × y × R
+# found separator
+δ : â × − → ä × − × R
+# go to the first non 0/1 symbol
+δ : ä × 1 → ä × 1 × R
+δ : ä × 0 → ä × 0 × R
+# write 0 (copy finished)
+δ : ä × − → å × 0 × L
+
+# copy 1
+# first go to the separator again
+δ : ã × x → ã × x × R
+δ : ã × y → ã × y × R
+# found separator
+δ : ã × − → æ × − × R
+# go to the first non 0/1 symbol
+δ : æ × 1 → æ × 1 × R
+δ : æ × 0 → æ × 0 × R
+# write 1 (copy finished)
+δ : æ × − → å × 1 × L
+
+# go to the separator
+δ : å × 0 → å × 0 × L
+δ : å × 1 → å × 1 × L
+# reached the separator
+δ : å × − → ç × − × L
+
+# now check there is still number to copy, if so, we use recursion (continue to state 'à')
+δ : ç × x → à × x × N
+δ : ç × y → à × y × N
+
+# nothing to copy, lefts finish copy; 'è' is exit state
+δ : ç × − → è × − × N
