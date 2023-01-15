@@ -10,6 +10,8 @@ import picocli.CommandLine.Command;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -112,10 +114,21 @@ public class StartCommand implements Runnable {
             The subroutine is a small set of states in the Turing machine that performs a small computation. You can
             like this:
             
-            import-subroutine src/main/resources/plus-subroutine.txt
+            import-subroutine src/main/resources/subroutines/decrement.txt
             
             Imported subroutines are parsed identically as are lines in the main (this) file. It's simply an option to
             re-use transition rules at multiple places.
+            
+            In case you need to re-use subroutine in different situations and end with different state (as in different
+            situations, you want to continue with different state), you can define subroutine instance entry and final 
+            state like this
+            
+            import-subroutine [replace state ß with A and è with B ] src/main/resources/subroutines/copy.txt
+            import-subroutine [replace state ß with C and è with D ] src/main/resources/subroutines/copy.txt
+            import-subroutine [replace state ß with E and è with F ] src/main/resources/subroutines/copy.txt
+            
+            Statements above import 'decrement' subroutine and replace states ß and è for each instance import. Thus you
+            have 3 possibly entry points for this subroutine and you can bind different follow-up states.
             
             Sometimes you need to match any character, in such case you can use special symbol '−'. For example when you
             want to reach the right-most non-blank symbols, you can do:
@@ -143,9 +156,57 @@ public class StartCommand implements Runnable {
                 .stream()
                 .filter(line -> line.startsWith("import-subroutine "))
                 .map(line -> line.replace("import-subroutine ", "").trim())
-                .map(path -> {
+                .map(line -> {
+                    final String path;
+                    // state replacements
+                    final Map<Character, Character> oldStateToNewState;
+                    if (line.startsWith("[replace state ")) {
+                        oldStateToNewState = new HashMap<>();
+                        var split = line.split("]");
+                        if (split.length != 2) {
+                            throw new IllegalArgumentException("Illegal definition of replacement state: "
+                                    + Arrays.toString(split));
+                        }
+                        path = split[1].trim();
+                        var stateReplacements = split[0].replace("[replace state ", "").split("and");
+                        if (stateReplacements.length == 0) {
+                            throw new IllegalArgumentException("At least one state replacement must be defined, got none");
+                        }
+                        for (String stateReplacement : stateReplacements) {
+                            final var states = stateReplacement.trim().split("with");
+                            if (states.length != 2) {
+                                throw new IllegalArgumentException("Illegal state replacement definition, got "
+                                        + stateReplacement);
+                            }
+                            final char replaceState = states[0].trim().charAt(0);
+                            final char replacementState = states[1].trim().charAt(0);
+                            oldStateToNewState.put(replaceState, replacementState);
+                        }
+                    } else {
+                        path = line;
+                        oldStateToNewState = Map.of();
+                    }
+
                     try {
-                        return Files.readAllLines(Path.of(path));
+                        final Path of = Path.of(path);
+                        if (oldStateToNewState.isEmpty()) {
+                            return Files.readAllLines(of);
+                        } else {
+                            return Files.readAllLines(of)
+                                    .stream()
+                                    .map(line1 -> {
+                                        if (line1.startsWith("δ")) {
+                                            String newLine = "";
+                                            for (char c1 : line1.toCharArray()) {
+                                                newLine += oldStateToNewState.getOrDefault(c1, c1);
+                                            }
+                                            return newLine;
+                                        } else {
+                                            return line1;
+                                        }
+                                    })
+                                    .toList();
+                        }
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }

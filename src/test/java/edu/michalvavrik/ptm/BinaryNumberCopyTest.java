@@ -41,7 +41,7 @@ public class BinaryNumberCopyTest {
 
     }
 
-    private void verify(TuringMachine.Configuration[] configurations, int expected, char separator) {
+    static void verify(TuringMachine.Configuration[] configurations, int expected, char separator) {
         final var configuration = configurations[configurations.length - 1];
 
         // this needs to be done as String split is not reliable with ^
