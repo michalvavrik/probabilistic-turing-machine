@@ -2,19 +2,15 @@ package edu.michalvavrik.ptm.core;
 
 import org.jboss.logging.Logger;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import static java.lang.String.format;
 
 final class TuringMachineImpl implements TuringMachine {
 
     private static final Logger LOG = Logger.getLogger(TuringMachineImpl.class);
-    private static final float LOAD_FACTOR = 1.75f;
 
     private final TransitionFunction transitionFunction;
 
@@ -95,7 +91,7 @@ final class TuringMachineImpl implements TuringMachine {
     }
 
     @Override
-    public Configuration[] compute(char[] inputData) {
+    public Configuration compute(char[] inputData) {
         // validate input data
         if (inputData == null || inputData.length == 0) {
             throw new IllegalArgumentException("Input data were not provided");
@@ -111,10 +107,9 @@ final class TuringMachineImpl implements TuringMachine {
         char[] tape = Arrays.copyOf(inputData, inputData.length);
         int tapeHead = 0;
         char currentState = initialState;
-        final List<Configuration> configurations = new ArrayList<>();
-        final var initialConfiguration = new Configuration(tape, currentState);
-        printOutConfiguration(initialConfiguration);
-        configurations.add(initialConfiguration);
+        var configuration = new Configuration(tape, currentState);
+        int configurationIndex = 0;
+        printOutConfiguration(configuration, configurationIndex);
 
         // process input
         while (!finalStates.contains(currentState)) {
@@ -160,18 +155,17 @@ final class TuringMachineImpl implements TuringMachine {
             }
 
             // record configuration
-            final var configuration = new Configuration(Arrays.copyOf(tape, tape.length), currentState);
-            printOutConfiguration(configuration);
-            configurations.add(configuration);
+            configuration = new Configuration(Arrays.copyOf(tape, tape.length), currentState);
+            configurationIndex++;
+            printOutConfiguration(configuration, configurationIndex);
         }
 
-        return configurations.toArray(new Configuration[0]);
+        return configuration;
     }
 
-    private static void printOutConfiguration(Configuration configuration) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(format("Configuration: state '%s', tape: %s", configuration.state(), new String(configuration.tape())));
-        }
+    private static void printOutConfiguration(Configuration configuration, int configurationIndex) {
+        LOG.debugf("Configuration #%d: state '%s', tape: %s", (Object) configurationIndex, configuration.state(),
+                new String(configuration.tape()));
     }
 
     static char[] growTapeOnRight(char[] oldTape) {
@@ -181,7 +175,7 @@ final class TuringMachineImpl implements TuringMachine {
             newTape = Arrays.copyOf(oldTape, 5);
         } else {
             // reallocate new space on the right so that we don't have to create new array with every new item
-            newTape = Arrays.copyOf(oldTape, (int) (oldTape.length * LOAD_FACTOR));
+            newTape = Arrays.copyOf(oldTape, nextTapeLength(oldTape.length));
         }
         // empty tape consist of blank symbols
         Arrays.fill(newTape, oldTape.length, newTape.length, BLANK);
@@ -190,10 +184,17 @@ final class TuringMachineImpl implements TuringMachine {
 
     static char[] growTapeOnLeft(char[] oldTape) {
         // add blank symbols to the left
-        final char[] newTape = new char[(int)(oldTape.length * LOAD_FACTOR)];
+        final char[] newTape = new char[nextTapeLength(oldTape.length)];
         System.arraycopy(oldTape, 0, newTape, newTape.length - oldTape.length, oldTape.length);
         Arrays.fill(newTape, 0, newTape.length - oldTape.length, BLANK);
         return newTape;
+    }
+
+    private static int nextTapeLength(int oldTapeLength) {
+        // some Java collections use 1.75f load factor, but that leads faster to Java heap space error
+        // therefore use array and enlarge it slightly (25 items)
+        // practically it means slower execution but better memory efficiency
+        return oldTapeLength + 25;
     }
 
 }

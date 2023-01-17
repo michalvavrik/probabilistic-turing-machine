@@ -42,8 +42,7 @@ public class DecrementTest {
         verify(cmd.computeInputData(), 0);
     }
 
-    private void verify(TuringMachine.Configuration[] configurations, int expected) {
-        final var configuration = configurations[configurations.length - 1];
+    private void verify(TuringMachine.Configuration configuration, int expected) {
         final int actual = Integer.parseInt(new String(configuration.tape()), 2);
         Assertions.assertEquals(expected, actual);
     }

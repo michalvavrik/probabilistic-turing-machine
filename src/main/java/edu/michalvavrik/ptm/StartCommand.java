@@ -94,7 +94,7 @@ public class StartCommand implements Runnable {
             δ : B × b → B × c × L
             δ : B × # → C × c × N
             
-            Please bear in mind that '×' (multiplication sign) and '→' (arrow U+2192) must not be part of the tape 
+            Please bear in mind that '×' (multiplication sign) and '→' (arrow U+2192) must not be part of the tape
             alphabet. The symbol '#' is used to mark the blank symbol.
             
             Be default Q, F, Γ elements state are auto-detected from transition function rules, that is final states are
@@ -124,8 +124,6 @@ public class StartCommand implements Runnable {
             state like this
             
             import-subroutine [replace state ß with A and è with B ] src/main/resources/subroutines/copy.txt
-            import-subroutine [replace state ß with C and è with D ] src/main/resources/subroutines/copy.txt
-            import-subroutine [replace state ß with E and è with F ] src/main/resources/subroutines/copy.txt
             
             Statements above import 'decrement' subroutine and replace states ß and è for each instance import. Thus you
             have 3 possibly entry points for this subroutine and you can bind different follow-up states.
@@ -373,27 +371,26 @@ public class StartCommand implements Runnable {
 
     @Override
     public void run() {
-        final TuringMachine.Configuration[] configurations = computeInputData();
-
+        computeInputData();
         // FIXME count complexity as we know exact number of steps
     }
 
-    TuringMachine.Configuration[] computeInputData() {
+    TuringMachine.Configuration computeInputData() {
         Objects.requireNonNull(inputData);
         inputData = inputData.trim();
         final var turingMachine = turingMachineBuilder.build();
-        final TuringMachine.Configuration[] configurations;
+        final TuringMachine.Configuration configuration;
 
         // if string contains digits and conversion is enabled, converse them to binary numbers
         if (converseDecimalToBinary && NUMBER_PATTERN.matcher(inputData).find()) {
 
-            configurations = turingMachine.compute(decimalToBinary(inputData.toCharArray()).toCharArray());
+            configuration = turingMachine.compute(decimalToBinary(inputData.toCharArray()).toCharArray());
         } else {
 
-            configurations = turingMachine.compute(inputData.toCharArray());
+            configuration = turingMachine.compute(inputData.toCharArray());
         }
 
-        return configurations;
+        return configuration;
     }
 
     static String decimalToBinary(char[] charArr) {

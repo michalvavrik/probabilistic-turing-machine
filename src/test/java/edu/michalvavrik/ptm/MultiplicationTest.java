@@ -31,8 +31,7 @@ public class MultiplicationTest {
         cmd.setTransitionFunction("src/test/resources/multiplication-test.txt");
         var inputData = Arrays.stream(products).mapToObj(Long::toString).collect(Collectors.joining("*"));
         cmd.setInputData(inputData);
-        final var configurations = cmd.computeInputData();
-        final long actual = Long.parseLong(new String(configurations[configurations.length - 1].tape()), 2);
+        final long actual = Long.parseLong(new String(cmd.computeInputData().tape()), 2);
         final long expected = Arrays.stream(products).reduce(1, (p1, p2) -> p1 * p2);
         Assertions.assertEquals(expected, actual);
     }

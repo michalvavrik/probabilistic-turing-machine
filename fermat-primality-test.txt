@@ -1,0 +1,24 @@
+# Fermat primality test
+
+input data: 65
+
+PLAN:
+
+decrement 65
+64
+add ^
+64^
+copy number
+64^64
+add %
+copy number
+64^64##%64
+@@@@@@ if left side (number on the left of the ^) is not 1; 1 -> exit (make decision), not 1 -> carry below
+copy to distant place so that there is enough space for computation
+64^64##%64#########################################################################################64^64##%64
+apply power subroutine to the left 64^64##%64
+result is 3.940201e+115##%64########################################################64^64##%64
+that means power must copy to the left
+than if result is one, delete the number and then go to the right till you reach the number
+decrement first number (before ^)
+continue with @@@@@@

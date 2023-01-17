@@ -1,10 +1,233 @@
 # Binary arithmetic - Exponentiation operation
 
-import-subroutine src/main/resources/subroutines/multiplication.txt
+# contract: we expect 5^3#5 to result in 125#5
+# while the number after # is option, the contract ensures that if the number (here 5) is present,
+# result and the number will be separated with exactly one blank symbol (#)
 
-# at this point, we expect products separated with the blank symbol and ended with the semi-colon
-# examples: either 5*5#; or 5*5#*5#*5;
-# we start compute from the left and count on the semi-colon
+# we expect to start on the left-most non-blank symbol
+# find # between 5^3#5 and replace it with ;
+δ : é × − → é × − × R
+δ : é × # → ó × ; × R
 
-# go to the right and
-δ : Û × − → Û × − × R
+# now copy the number behind # (that's 5 here) to the left and replace 1 with x and 0 with y
+# go to the right-most digit number and replace it
+δ : ó × 1 → õ × 1 × N
+δ : ó × 0 → õ × 0 × N
+δ : õ × 0 → õ × 0 × R
+δ : õ × 1 → õ × 1 × R
+δ : õ × − → ö × − × L
+δ : ö × 1 → ø × x × L
+δ : ö × 0 → ý × y × L
+# x=1 path: now go to the left where we want to copy the number
+δ : ø × − → ø × − × L
+δ : ø × ^ → ù × ^ × L
+δ : ù × 0 → ù × 0 × L
+δ : ù × 1 → ù × 1 × L
+δ : ù × x → ù × x × L
+δ : ù × y → ù × y × L
+# illegal state - not enough space on the left, exit
+δ : ù × − → û × − × L
+# go back and continue with the copy
+δ : ù × # → ú × x × R
+δ : ú × − → ú × − × R
+δ : ú × ; → ó × ; × R
+# y=0 path: now go to the left where we want to copy the number
+δ : ý × − → ý × − × L
+δ : ý × ^ → ÿ × ^ × L
+δ : ÿ × 0 → ÿ × 0 × L
+δ : ÿ × 1 → ÿ × 1 × L
+δ : ÿ × x → ÿ × x × L
+δ : ÿ × y → ÿ × y × L
+# illegal state - not enough space on the left, exit
+δ : ÿ × − → û × − × L
+# go back and continue with the copy
+δ : ÿ × # → ú × y × R
+
+# nothing (left) to copy, let's move on
+δ : ó × # → ô × # × L
+δ : ó × x → ô × x × L
+δ : ó × y → ô × y × L
+
+# now we want to mark where should be power computed with ! from the right
+δ : ô × − → ô × − × L
+δ : ô × # → î × ! × R
+δ : î × − → î × − × R
+δ : î × ; → ê × ; × L
+
+
+# now make sure we only continue if the number is higher than one
+δ : ê × 0 → ì × 0 × L
+δ : ì × 0 → ì × 0 × L
+δ : ì × 1 → í × 1 × L
+δ : ê × 1 → ë × 1 × L
+δ : ë × 0 → ë × 0 × L
+δ : ë × 1 → í × 1 × L
+
+# state ï means exponentiation is finished as exponent is lesser or equal to 1
+δ : ì × ^ → ï × ^ × L
+δ : ë × ^ → ï × ^ × L
+δ : ê × ^ → ï × ^ × L
+
+# swipe and copy to the left
+# first we want to clean the mess and only leave exponentiation result and optional number
+# example 5^2#5 should result in 25!5^1#5 -> 25#5
+# 1. go to exponentiation result
+δ : ï × − → ï × − × L
+δ : ï × ! → Đ × ! × L
+δ : Đ × − → Đ × − × L
+δ : Đ × 1 → Ĩ × 1 × R
+δ : Đ × 0 → Ĩ × 0 × R
+# 2. swipe everything between result and ; (included) as we don't really need it anymore
+# mark the copy start with &
+δ : Ĩ × − → đ × & × R
+δ : đ × − → đ × # × R
+δ : đ × ; → Ē × # × R
+# 3. copy the number (in the example it's 5) next to the result, mark starting position with a semicolon
+δ : Ē × x → ĕ × ; × L
+δ : Ē × y → Ė × ; × L
+# now we just copy the number to the next to the first non-blank symbol and continue with copying of others (recursion)
+# x=1 path
+δ : ĕ × # → ĕ × # × L
+δ : ĕ × − → ė × − × R
+δ : ė × # → đ × 1 × R
+# y=0 path
+δ : Ė × # → Ė × # × L
+δ : Ė × − → Ę × − × R
+δ : Ę × # → đ × 0 × R
+# 4. nothing else to copy, let's go to the result and exit
+δ : Ē × # → ē × # × L
+δ : ē × ; → ē × # × L
+δ : ē × − → ē × − × L
+δ : ē × & → ĩ × # × R
+δ : ĩ × 1 → ĩ × 1 × R
+δ : ĩ × 0 → ĩ × 0 × R
+δ : ĩ × − → Ĕ × − × L
+
+# at this point we know the number is higher than one
+δ : í × − → í × − × L
+# decrement: 5^3#5 -> 5^2#5
+δ : í × ^ → ð × ^ × R
+
+import-subroutine [replace state Û with ð and Ü with ñ] src/main/resources/subroutines/decrement.txt
+δ : ñ × − → Ě × − × N
+
+# now the number is decremented to 5^2#5, copy the number left to the ^ (here it's 5) to the left right behind the !
+# if right behind ! is no number, we need to copy it twice and add *, if there is a number, we want to add * and copy it once
+δ : Ě × ^ → ò × ^ × L
+δ : Ě × 1 → Ě × 1 × L
+δ : Ě × 0 → Ě × 0 × L
+δ : Ě × ; → Ě × ; × L
+# first we need to make sure that previous copy leftovers (w and v) are transformed back to the 1 and 0
+δ : ò × w → ò × 1 × L
+δ : ò × v → ò × 0 × L
+# okay, now we have actual digits, go back to the ^ from 5^2#5
+δ : ò × − → ā × − × N
+δ : ā × − → ā × − × R
+δ : ā × ^ → ć × ^ × L
+# check if there is a number, if so, append * and start copy
+# if there is no number, start copy
+# if there are no numbers, start multiplication
+δ : ć × − → ć × − × L
+δ : ć × ! → Ċ × ! × L
+# there is a first number
+δ : Ċ × 1 → ę × 1 × L
+δ : Ċ × 0 → ę × 0 × L
+δ : ę × 1 → ę × 1 × L
+δ : ę × 0 → ę × 0 × L
+# add * if needed
+δ : ę × # → Č × * × L
+δ : ę × * → Č × * × L
+# check if there is a second number, e.g. 5*5, so check there is a first 5 from left,
+# if so, go to the left-most digit and proceed to the multiplication
+δ : Č × 1 → č × 1 × L
+δ : Č × 0 → č × 0 × L
+δ : č × 1 → č × 1 × L
+δ : č × 0 → č × 0 × L
+δ : č × # → Ď × # × R
+# no number, go to the ^, meanwhile turn w and v to 1 and 0 respectively (we are doing second copy) and start copy
+δ : Č × # → ċ × # × R
+
+# there is no number, go to the ^ and start copy
+δ : Ċ × # → ċ × # × R
+δ : ċ × − → ċ × − × R
+δ : ċ × w → ċ × 1 × R
+δ : ċ × v → ċ × 0 × R
+δ : ċ × ^ → Ă × ^ × L
+
+
+# now we can start copy
+δ : Ă × w → Ă × w × L
+δ : Ă × v → Ă × v × L
+δ : Ă × 1 → ă × w × L
+δ : Ă × 0 → Ą × v × L
+# copy is finished
+δ : Ă × − → Ć × − × N
+# go to the ^ and check what should we do next (recursion)
+δ : Ć × − → Ć × − × R
+δ : Ć × ^ → ć × ^ × L
+
+# w=1 path
+# go to the # after ! that marks the place where we want to start copy
+δ : ă × − → ă × − × L
+δ : ă × ! → Ĝ × ! × L
+δ : Ĝ × − → Ĝ × − × L
+# write down 1 and go back to the ^ and continue copying (recursion)
+δ : Ĝ × # → Ĉ × 1 × R
+δ : Ĉ × − → Ĉ × − × R
+δ : Ĉ × ^ → Ă × ^ × L
+
+
+# v=0 path
+# go to the # that marks the place where we want to start copy
+δ : Ą × − → Ą × − × L
+δ : Ą × ! → ĝ × ! × L
+δ : ĝ × − → ĝ × − × L
+# write down 0 and go back to the ^ and continue copying (recursion)
+δ : ĝ × # → Ĉ × 0 × R
+
+# multiplication
+import-subroutine [replace state « with ą and h with ď] src/main/resources/subroutines/multiplication.txt
+# before we start multiplication, get rid of !
+δ : Ď × − → Ď × − × R
+δ : Ď × ! → ĉ × # × L
+δ : ĉ × − → ĉ × − × L
+δ : ĉ × # → ą × # × R
+# after multiplication, we need to enclose the result and 5^2; as the multiplication algorithm places result more
+# to the left and with higher exponents, it's really expensive and inefficient
+# first mark the left end with @
+δ : ď × 1 → ď × 1 × L
+δ : ď × 0 → ď × 0 × L
+δ : ď × # → Ġ × @ × R
+# mark right end with an exclamation mark: #5^2; -> !5^2; and also xy5^2 -> !xy5^2
+δ : Ġ × − → Ġ × − × R
+δ : Ġ × # → Ğ × # × R
+δ : Ğ × # → Ğ × # × R
+δ : Ğ × − → ğ × − × L
+δ : ğ × # → Ģ × ! × L
+# copy the multiplication result next to the exclamation mark
+δ : Ģ × − → Ģ × − × L
+δ : Ģ × 1 → Ĥ × r × R
+δ : Ģ × 0 → ĥ × s × R
+# r=1 path and continue copying (recursion)
+δ : Ĥ × − → Ĥ × − × R
+δ : Ĥ × 1 → ħ × 1 × L
+δ : Ĥ × 0 → ħ × 0 × L
+δ : Ĥ × ! → ħ × ! × L
+δ : ħ × − → Ģ × 1 × L
+# s=0 path and continue copying (recursion)
+δ : ĥ × − → ĥ × − × R
+δ : ĥ × 1 → Ħ × 1 × L
+δ : ĥ × 0 → Ħ × 0 × L
+δ : ĥ × ! → Ħ × ! × L
+δ : Ħ × − → Ģ × 0 × L
+# copy is finished, let's swipe everything that is not 0 or 1 between here and the copy result
+δ : Ģ × @ → ģ × # × R
+δ : ģ × 1 → Ā × 1 × R
+δ : ģ × 0 → Ā × 0 × R
+δ : ģ × − → ģ × # × R
+
+# now go to the right to the ; and continue with steps above (recursion: decrement 5^3 -> 5^2 and so on)
+δ : Ā × − → Ā × − × R
+δ : Ā × w → Ā × 1 × R
+δ : Ā × v → Ā × 0 × R
+δ : Ā × ; → ê × ; × L

@@ -1,7 +1,7 @@
 # Binary arithmetic - unsigned decrement operation
 # loosely based on https://www.cs.princeton.edu/courses/archive/fall13/cos126/lectures/18-Turing-2x2.pdf
 
-# start on the right-most digit
+# starts on the left and head to the right before we start to decrement
 δ : Û × 1 → Ý × 1 × R
 δ : Ý × 1 → Ý × 1 × R
 δ : Ý × 0 → Ý × 0 × R

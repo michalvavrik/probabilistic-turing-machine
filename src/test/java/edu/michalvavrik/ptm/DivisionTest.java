@@ -26,8 +26,7 @@ public class DivisionTest {
         cmd.setTransitionFunction("src/test/resources/division-test.txt");
         var inputData = dividend + "#" + divisor;
         cmd.setInputData(inputData);
-        final var configurations = cmd.computeInputData();
-        final var result = new String(configurations[configurations.length - 1].tape())
+        final var result = new String(cmd.computeInputData().tape())
                 .split(TuringMachine.BLANK + "" + TuringMachine.BLANK);
 
         // test whole-number (integer) result

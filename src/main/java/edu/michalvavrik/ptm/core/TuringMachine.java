@@ -69,7 +69,7 @@ public interface TuringMachine {
      * @return ordered configurations; last configuration is simply the state of tape when Turing machine reached one of
      * the final states (plus the final state)
      */
-    Configuration[] compute(char[] inputData);
+    Configuration compute(char[] inputData);
 
     final class TuringMachineBuilder {
 

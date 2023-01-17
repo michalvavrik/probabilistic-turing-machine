@@ -25,8 +25,7 @@ public class ModuloTest {
         cmd.setTransitionFunction("src/test/resources/modulo-test.txt");
         var inputData = dividend + "#" + divisor;
         cmd.setInputData(inputData);
-        final var configurations = cmd.computeInputData();
-        final var result = new String(configurations[configurations.length - 1].tape());
+        final var result = new String(cmd.computeInputData().tape());
 
         // test remainder
         final long actual = Long.parseLong(result, 2);

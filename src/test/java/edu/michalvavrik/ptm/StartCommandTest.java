@@ -36,8 +36,8 @@ public class StartCommandTest {
         cmd.setTransitionFunction("src/test/resources/any-char-function.txt");
         final var inputData = new char[]{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
         final var turingMachine = cmd.turingMachineBuilder.build();
-        final var configurations = turingMachine.compute(inputData);
-        final var actual = configurations[configurations.length - 1].tape();
+        final var configuration = turingMachine.compute(inputData);
+        final var actual = configuration.tape();
         final var expected = new char[]{'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b'};
         Assertions.assertArrayEquals(expected, actual);
     }
