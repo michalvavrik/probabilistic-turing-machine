@@ -1,5 +1,7 @@
 # Binary arithmetic - modulo operation
 
+# WARNING: both binary numbers must be of same length
+
 import-subroutine src/main/resources/subroutines/division.txt
 
 # go left and delete division result so that only remainder is left

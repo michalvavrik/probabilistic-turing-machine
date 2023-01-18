@@ -53,7 +53,7 @@ public class BinaryNumberCopyTest {
         Assertions.assertEquals(splitBySeparator.length, 2);
     }
 
-    private static String[] splitBySeparator(char[] tape, char separator) {
+    static String[] splitBySeparator(char[] tape, char separator) {
         final String[] result = new String[] { "", ""};
         int i = 0;
         for (char c : tape) {

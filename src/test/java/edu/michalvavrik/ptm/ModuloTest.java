@@ -11,6 +11,7 @@ public class ModuloTest {
     void testBinaryModulo() throws IOException {
         moduloAndVerify(9, 5);
         moduloAndVerify(16, 7);
+        moduloAndVerify(16, 5);
         moduloAndVerify(8, 3);
         moduloAndVerify(754, 138);
         moduloAndVerify(657, 2);

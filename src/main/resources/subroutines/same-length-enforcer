@@ -1,0 +1,61 @@
+# This operation accepts 2 binary numbers and even the length of the right number to the left number
+# for example: 1011011#1 -> 1011011#0000001
+# new numbers are going to be placed on the left to the original numbers, while original numbers are going to be deleted
+
+# we expect to start on the left-most non-blank symbol (in the example, it's 1)
+# turn 1 to a, 0 to b and re-write the separating blank symbol to the dollar sign
+# 1011011#1 -> abaabaa$1
+δ : ļ × 1 → ļ × a × R
+δ : ļ × 0 → ļ × b × R
+δ : ļ × # → Ľ × $ × L
+# copy 'a' and 'b' to the left and replace them with c
+# abaabaa$1 -> 1#abaabac$1
+# 1#abaabac$1 -> 1011011#ccccccc$1
+δ : Ľ × b → ľ × c × L
+δ : Ľ × a → Ŀ × c × L
+# Ŀ == 1 path
+δ : Ŀ × − → Ŀ × − × L
+δ : Ŀ × # → ŀ × # × L
+δ : ŀ × 1 → ŀ × 1 × L
+δ : ŀ × 0 → ŀ × 0 × L
+δ : ŀ × # → Ł × 1 × R
+# ľ == 0 path
+δ : ľ × − → ľ × − × L
+δ : ľ × # → ł × # × L
+δ : ł × 1 → ł × 1 × L
+δ : ł × 0 → ł × 0 × L
+δ : ł × # → Ł × 0 × R
+# copy other symbols of the left number (recursion)
+δ : Ł × − → Ł × − × R
+δ : Ł × c → Ľ × c × L
+# copy finished
+δ : Ľ × # → ō × # × R
+δ : ō × − → ō × − × R
+δ : ō × $ → Ń × $ × R
+# go to the right-most symbol and replace it with # and copy it to the left
+δ : Ł × $ → Ń × $ × R
+δ : Ń × 0 → ń × 0 × N
+δ : Ń × 1 → ń × 1 × N
+δ : ń × 1 → ń × 1 × R
+δ : ń × 0 → ń × 0 × R
+δ : ń × # → ŉ × # × L
+δ : ŉ × 0 → Ŋ × # × L
+δ : ŉ × 1 → ŋ × # × L
+# ŋ == 1 path
+δ : ŋ × − → ŋ × − × L
+δ : ŋ × c → Ō × 1 × R
+# Ŋ == 0 path
+δ : Ŋ × − → Ŋ × − × L
+δ : Ŋ × c → Ō × 0 × R
+# go back to the $ and continue copy (recursion)
+δ : Ō × − → Ō × − × R
+δ : Ō × $ → Ń × $ × R
+# copy is finished, replace 'c' with 0, go to the left-most non-blank digit of the left number and finish
+δ : Ń × # → Ņ × # × L
+δ : Ņ × $ → Ņ × # × L
+δ : Ņ × c → Ņ × 0 × L
+δ : Ņ × − → Ņ × − × L
+δ : Ņ × # → Ň × # × L
+δ : Ň × − → Ň × − × L
+# 'ň' is exit state
+δ : Ň × # → ň × # × R

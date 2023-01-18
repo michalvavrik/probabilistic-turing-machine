@@ -96,6 +96,7 @@
 δ : Ę × # → đ × 0 × R
 # 4. nothing else to copy, let's go to the result and exit
 δ : Ē × # → ē × # × L
+δ : Ē × ~ → ē × ~ × L
 δ : ē × ; → ē × # × L
 δ : ē × − → ē × − × L
 δ : ē × & → ĩ × # × R

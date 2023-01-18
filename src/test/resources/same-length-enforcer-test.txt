@@ -1,0 +1,3 @@
+initial-state ļ
+
+import-subroutine src/main/resources/subroutines/same-length-enforcer
