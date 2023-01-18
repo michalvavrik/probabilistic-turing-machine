@@ -1,0 +1,61 @@
+# Special case of the congruence modulo
+# for given 'a' and 'n' this operation computes a^(n-1)≡1 (mod n)
+# if above-mentioned is true (n is prime or Fermat pseudoprime), operation ends with 1, otherwise with 0 (Fermat witness)
+# expected format is 'a' and 'n' separated with single blank symbol and number of blank symbols between n and ~binary-number must
+be exactly number of digits of 'n' + 3 (more is acceptable, for less the behavior is undefined): ###a#n##~binary-number
+# contract: it is possible to save any characters next to the 'n' if separated with at least one blank symbol
+# for example: ###2#3##~100110 will result in 1~100110, symbols '~100110' are guaranteed to stay intact
+
+# we expect to start on the left, that's for 2#3..., when it comes to state Ī, head should be on 2
+# now rewrite a#n###~binary-number to a^n#n###~binary-number
+
+# a#n###~binary-number -> a^n#n###~binary-number
+δ : Ī × − → Ī × − × R
+δ : Ī × # → ī × ^ × R
+
+import-subroutine [replace state ß with ī and è with Ĭ] src/main/resources/subroutines/copy.txt
+
+# now we are on the last digit (first from right) of the left 'n'
+# go to its first digit and decrement the number
+# a^n#n###~binary-number -> a^n-1#n###~binary-number
+δ : Ĭ × − → Ĭ × − × L
+δ : Ĭ × ^ → Į × ^ × R
+import-subroutine [replace state Û with Į and Ü with į and Þ with Ĺ and Ý with Ļ] src/main/resources/subroutines/decrement.txt
+
+# no go to the left-most digit of 'a' and raise 'a' to the power of the n-1
+δ : į × − → į × − × L
+δ : į × ^ → İ × ^ × L
+δ : İ × 1 → İ × 1 × L
+δ : İ × 0 → İ × 0 × L
+δ : İ × − → ı × − × R
+import-subroutine [replace state é with ı and Ĕ with Ĳ] src/main/resources/subroutines/exponentiation
+
+# if we lay a=2, n=3 => 4#3###~binary-number, then at this point we are on the right-most digit of 3
+# go to the left-most digit of 4
+δ : Ĳ × − → Ĳ × − × L
+δ : Ĳ × # → ĳ × # × L
+δ : ĳ × − → ĳ × − × L
+δ : ĳ × # → Ö × # × R
+
+# perform modulo 4%3
+import-subroutine [replace state h with Ĵ] src/main/resources/subroutines/modulo.txt
+
+# we expect to finish left to the modulo result, so let's go to the left-most digit of the result
+δ : Ĵ × − → Ĵ × # × R
+δ : Ĵ × ~ → ķ × ~ × L
+δ : Ĵ × 1 → ĵ × # × R
+# path: result is 1
+δ : ĵ × ~ → Ķ × ~ × L
+δ : ĵ × # → ĵ × # × R
+# path: result is 0
+δ : ĵ × 0 → ĺ × # × R
+δ : ĺ × − → ĺ × # × R
+δ : ĺ × ~ → ķ × ~ × L
+
+# write modulo result == 0
+δ : ķ × # → ĸ × 0 × R
+
+# write modulo result == 1
+δ : Ķ × # → ĸ × 1 × R
+
+# we exit on ~

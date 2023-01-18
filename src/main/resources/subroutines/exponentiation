@@ -102,6 +102,7 @@
 δ : ĩ × 1 → ĩ × 1 × R
 δ : ĩ × 0 → ĩ × 0 × R
 δ : ĩ × − → Ĕ × − × L
+# we exit on the last digit of '5'
 
 # at this point we know the number is higher than one
 δ : í × − → í × − × L

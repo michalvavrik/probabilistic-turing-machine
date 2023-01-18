@@ -22,3 +22,5 @@ that means power must copy to the left
 than if result is one, delete the number and then go to the right till you reach the number
 decrement first number (before ^)
 continue with @@@@@@
+
+# todo next state is 316

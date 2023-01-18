@@ -51,10 +51,10 @@ public class StartCommand implements Runnable {
             }
             final char symbolChar = symbol.charAt(0);
             if (symbolChar == ANY) {
-                throw new IllegalArgumentException(String.format("Input alphabet must not contain '%s' symbol", ANY));
+                throw new IllegalArgumentException(format("Input alphabet must not contain '%s' symbol", ANY));
             }
             if (symbolChar == BLANK) {
-                throw new IllegalArgumentException(String.format("Input alphabet must not contain '%s' symbol", BLANK));
+                throw new IllegalArgumentException(format("Input alphabet must not contain '%s' symbol", BLANK));
             }
             turingMachineBuilder.addInputAlphabetSymbol(symbolChar);
         }

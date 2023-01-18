@@ -11,7 +11,7 @@
 # we reached separator
 δ : ß × − → à × − × L
 
-# go the left again
+# go left again
 δ : à × x → à × x × L
 δ : à × y → à × y × L
 
@@ -56,5 +56,5 @@
 δ : ç × x → à × x × N
 δ : ç × y → à × y × N
 
-# nothing to copy, lefts finish copy; 'è' is exit state
+# nothing to copy, lets finish copy; 'è' is exit state
 δ : ç × − → è × − × N
