@@ -30,7 +30,19 @@ accepts n
 choose random a lesser than n and greater than 2
 
 algorithm:
-1. take n
-2. decrement random number of times and proceed
-3. if number a == 3, stop decrement and proceed
-4. rewrite it so that we write a#n#2xn
+- start on 2
+- choose probabilistic transition function - either increment or continue to modulo
+ - if equal to n-1 go to modulo, otherwise increment (recursion)
+ - continue to modulo
+- modulo
+
+1. write number
+101011101
+2. decrement it (to n-1)
+3. add 2
+101011101#10
+4. probabilistic step - choose one of:
+ - continue to modulo
+ - (compare) if equal to n-1 continue to modulo, otherwise increment and run 4.
+
+# todo spare state Ţ

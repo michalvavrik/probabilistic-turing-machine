@@ -1,0 +1,3 @@
+initial-state Œ
+
+import-subroutine src/main/resources/subroutines/binary-number-comparator.txt

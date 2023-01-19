@@ -1,0 +1,78 @@
+# Compare 2 binary numbers
+
+# starts on the left
+δ : Œ × 0 → œ × y × R
+δ : Œ × 1 → ŕ × x × R
+δ : Œ × y → Œ × y × R
+δ : Œ × x → Œ × x × R
+
+# found 1 on the left side
+δ : ŕ × − → ŕ × − × R
+# we reached the middle separator #
+δ : ŕ × # → ţ × # × R
+δ : ţ × x → ţ × x × R
+δ : ţ × y → ţ × y × R
+# found a one, so far both sides are equal
+δ : ţ × 1 → Ť × x × L
+# numbers are different
+δ : ţ × − → Ŝ × − × N
+
+# found 0 on the left side
+δ : œ × − → œ × − × R
+# we reached the middle separator #
+δ : œ × # → Ŕ × # × R
+δ : Ŕ × x → Ŕ × x × R
+δ : Ŕ × y → Ŕ × y × R
+# found a zero, so far both sides are equal
+δ : Ŕ × 0 → Ť × y × L
+# numbers are different
+δ : Ŕ × − → Ŝ × − × N
+
+# go to the left side and compare other numbers
+δ : Ť × − → Ť × − × L
+δ : Ť × # → ř × # × L
+δ : ř × 1 → ř × 1 × L
+δ : ř × 0 → ř × 0 × L
+δ : ř × x → ř × x × L
+δ : ř × y → ř × y × L
+δ : ř × − → Œ × − × R
+
+# todo spare state ś, š
+
+# go to the middle separator
+δ : Ŝ × − → Ŝ × − × L
+δ : Ŝ × # → ŝ × # × R
+# right side - turn x to 1 and y to 0
+δ : ŝ × x → ŝ × 1 × R
+δ : ŝ × 1 → ŝ × 1 × R
+δ : ŝ × 0 → ŝ × 0 × R
+δ : ŝ × y → ŝ × 0 × R
+δ : ŝ × − → Ş × − × L
+# go to the middle
+δ : Ş × # → ş × # × L
+δ : Ş × − → Ş × − × L
+# left side - turn x to 1 and y to 0
+δ : ş × x → ş × 1 × L
+δ : ş × y → ş × 0 × L
+δ : ş × 0 → ş × 0 × L
+δ : ş × 1 → ş × 1 × L
+# Š is exit state when numbers are not equal
+δ : ş × − → Š × − × L
+
+# left number is compared (all equal so far), let's assure right number is too (necessary when left < right)
+δ : Œ × # → Ŗ × # × R
+# there should be no 1 and zeros on the right side, therefore numbers are not equal
+δ : Ŗ × 1 → Ŝ × 1 × R
+δ : Ŗ × 0 → Ŝ × 1 × R
+# right side - turn x to 1 and y to 0
+δ : Ŗ × x → Ŗ × 1 × R
+δ : Ŗ × y → Ŗ × 0 × R
+δ : Ŗ × − → ŗ × − × L
+# go to the middle
+δ : ŗ × # → Ř × # × L
+δ : ŗ × − → ŗ × − × L
+# left side - turn x to 1 and y to 0
+δ : Ř × x → Ř × 1 × L
+δ : Ř × y → Ř × 0 × L
+# Ś is exit state when numbers are equal
+δ : Ř × − → Ś × − × L
