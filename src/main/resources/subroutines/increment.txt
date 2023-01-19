@@ -1,0 +1,18 @@
+# Binary arithmetic - unsigned increment operation
+# based on https://www.cs.princeton.edu/courses/archive/fall13/cos126/lectures/18-Turing-2x2.pdf
+
+# starts on the left and head to the right before we start to decrement
+δ : Ŏ × 0 → Ŏ × 0 × R
+δ : Ŏ × 1 → Ŏ × 1 × R
+δ : Ŏ × − → ŏ × − × L
+
+# increment
+δ : ŏ × 1 → ŏ × 0 × L
+δ : ŏ × 0 → ő × 1 × L
+δ : ŏ × # → Ő × 1 × L
+
+# exit in Ő and stops on the left-most digit of the incremented number
+δ : ő × 1 → ő × 1 × L
+δ : ő × 0 → ő × 0 × L
+δ : ő × − → Ő × − × R
+

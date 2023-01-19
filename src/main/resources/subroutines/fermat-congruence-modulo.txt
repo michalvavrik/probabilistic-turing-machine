@@ -37,10 +37,10 @@ import-subroutine [replace state é with ı and Ĕ with Ĳ] src/main/resources/s
 δ : Ĳ × − → Ĳ × − × L
 δ : Ĳ × # → ĳ × # × L
 δ : ĳ × − → ĳ × − × L
-δ : ĳ × # → Ö × # × R
+δ : ĳ × # → ļ × # × R
 
-# todo handle exponent (n) lesser or equal 2 as illegal state
-# modulo needs a space on the right, how much, is it going to work? need a test for the biggest base and small exponent and small base and biggest base and both biggest
+# make sure binary numbers are of same length, then proceed to the modulo
+import-subroutine [replace state ň with Ö] src/main/resources/subroutines/same-length-enforcer
 
 # perform modulo 4%3
 import-subroutine [replace state h with Ĵ] src/main/resources/subroutines/modulo.txt

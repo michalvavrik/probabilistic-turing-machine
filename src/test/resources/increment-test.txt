@@ -1,0 +1,3 @@
+initial-state Ŏ
+
+import-subroutine src/main/resources/subroutines/increment.txt
