@@ -16,11 +16,13 @@ public interface TuringMachine {
      */
     char ANY = '−';
 
-    record Configuration(char[] tape, char state) {
+    record Configuration(char[] tape, char state, int timeComplexity, int memoryComplexity) {
 
-        public Configuration(char[] tape, char state) {
+        public Configuration(char[] tape, char state, int timeComplexity, int memoryComplexity) {
             this.tape = stripBlankSymbols(tape);
             this.state = state;
+            this.timeComplexity = timeComplexity;
+            this.memoryComplexity = memoryComplexity;
         }
 
         /**

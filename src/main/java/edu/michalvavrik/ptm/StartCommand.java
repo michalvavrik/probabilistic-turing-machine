@@ -37,7 +37,7 @@ public class StartCommand implements Runnable {
     final TuringMachineBuilder turingMachineBuilder = new TuringMachineBuilder();
 
     @CommandLine.Option(names = {"--binary-mode"}, description = "Detect all decimal numbers and converse them to binary",
-            defaultValue = "yes")
+            defaultValue = "true")
     boolean converseDecimalToBinary;
 
     @CommandLine.Option(names = {"--additional-input-alphabet-symbols"}, description = """
@@ -428,7 +428,10 @@ public class StartCommand implements Runnable {
 
     @Override
     public void run() {
-        computeInputData();
+        final var configuration = computeInputData();
+        LOG.infof("Final configuration - state '%s', tape '%s', problem instance time complexity '%d' and " +
+                        "memory complexity '%d'", configuration.state(), new String(configuration.tape()),
+                configuration.timeComplexity(), configuration.memoryComplexity());
         // FIXME count complexity as we know exact number of steps
     }
 

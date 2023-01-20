@@ -107,8 +107,9 @@ final class TuringMachineImpl implements TuringMachine {
         char[] tape = Arrays.copyOf(inputData, inputData.length);
         int tapeHead = 0;
         char currentState = initialState;
-        var configuration = new Configuration(tape, currentState);
         int configurationIndex = 0;
+        int writeOperationNum = 0;
+        var configuration = new Configuration(tape, currentState, configurationIndex, writeOperationNum);
         printOutConfiguration(configuration, configurationIndex);
 
         // process input
@@ -135,7 +136,10 @@ final class TuringMachineImpl implements TuringMachine {
 
             currentState = action.state();
             // write the symbol to the tape
-            tape[tapeHead] = action.symbol();
+            if (tape[tapeHead] != action.symbol()) {
+                tape[tapeHead] = action.symbol();
+                writeOperationNum++;
+            }
 
             // move the tape head
             switch (action.move()) {
@@ -155,7 +159,8 @@ final class TuringMachineImpl implements TuringMachine {
             }
 
             // record configuration
-            configuration = new Configuration(Arrays.copyOf(tape, tape.length), currentState);
+            configuration = new Configuration(Arrays.copyOf(tape, tape.length), currentState,
+                    configurationIndex, writeOperationNum);
             configurationIndex++;
             printOutConfiguration(configuration, configurationIndex);
         }

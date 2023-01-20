@@ -1,6 +1,8 @@
 # Fermat primality test with probabilistic search of 'a'
 # domain of the function is n > 2
 
+initial-state Ţ
+
 # on the tape we expect binary number 'n', for example 10, that should be tested for primality
 # first decrement the number which will help us which selection of 'a'; n -> n-1
 import-subroutine [replace state Û with Ţ and Ü with š and Ý with Ů and Þ with ů] src/main/resources/subroutines/decrement.txt

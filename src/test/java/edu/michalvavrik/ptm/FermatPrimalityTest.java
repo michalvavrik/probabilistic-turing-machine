@@ -2,6 +2,7 @@ package edu.michalvavrik.ptm;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
 import java.io.IOException;
 
@@ -16,7 +17,7 @@ public class FermatPrimalityTest {
         // and because of probabilistic step, the test is not deterministic, therefore sometimes it detects
         // Fermat witness, and sometimes it does not
         final var cmd = new StartCommand();
-        cmd.setTransitionFunction("src/test/resources/fermat-primality-test.txt");
+        cmd.setTransitionFunction("fermat-primality-test.txt");
         cmd.converseDecimalToBinary = true;
         verify(cmd, 3, PRIME);
         verify(cmd, 4, NOT_PRIME);
@@ -27,11 +28,12 @@ public class FermatPrimalityTest {
         verify(cmd, 9, NOT_PRIME);
     }
 
+    @EnabledIfSystemProperty(named = "fermat-full", matches = "true")
     @Test
     void bigNumbers() throws IOException {
         // flaky by design, see above
         final var cmd = new StartCommand();
-        cmd.setTransitionFunction("src/test/resources/fermat-primality-test.txt");
+        cmd.setTransitionFunction("fermat-primality-test.txt");
         cmd.converseDecimalToBinary = true;
         verify(cmd, 10, NOT_PRIME);
         verify(cmd, 11, PRIME);
