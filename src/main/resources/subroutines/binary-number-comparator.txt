@@ -55,7 +55,7 @@
 δ : ş × 0 → ş × 0 × L
 δ : ş × 1 → ş × 1 × L
 # Š is exit state when numbers are not equal
-δ : ş × − → Š × − × L
+δ : ş × − → Š × − × R
 
 # left number is compared (all equal so far), let's assure right number is too (necessary when left < right)
 δ : Œ × # → Ŗ × # × R
@@ -73,4 +73,4 @@
 δ : Ř × x → Ř × 1 × L
 δ : Ř × y → Ř × 0 × L
 # Ś is exit state when numbers are equal
-δ : Ř × − → Ś × − × L
+δ : Ř × − → Ś × − × R

@@ -17,7 +17,7 @@ import-subroutine [replace state Û with Ţ and Ü with š and Ý with Ů and Þ
 
 ## option 1: increment right number (n-1 -> n) and continue to modulo
 random δ : Ũ × − → ū × − × N
-### go to the 'n'
+### go to the 'n-1'
 δ : ū × − → ū × − × R
 δ : ū × # → ũ × # × R
 ### 'n-1' -> 'n' and continue to congruence (Ī is congruence entry state)
