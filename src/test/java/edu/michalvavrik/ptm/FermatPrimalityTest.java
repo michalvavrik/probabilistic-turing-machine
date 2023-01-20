@@ -11,7 +11,7 @@ public class FermatPrimalityTest {
     private static final int NOT_PRIME = 0;
 
     @Test
-    void primalityTest() throws IOException {
+    void primalitySmokeTest() throws IOException {
         // WARNING: this test is by design flaky as Fermat Primality Test also produce Fermat liars
         // and because of probabilistic step, the test is not deterministic, therefore sometimes it detects
         // Fermat witness, and sometimes it does not
@@ -25,6 +25,14 @@ public class FermatPrimalityTest {
         verify(cmd, 7, PRIME);
         verify(cmd, 8, NOT_PRIME);
         verify(cmd, 9, NOT_PRIME);
+    }
+
+    @Test
+    void bigNumbers() throws IOException {
+        // flaky by design, see above
+        final var cmd = new StartCommand();
+        cmd.setTransitionFunction("src/test/resources/fermat-primality-test.txt");
+        cmd.converseDecimalToBinary = true;
         verify(cmd, 10, NOT_PRIME);
         verify(cmd, 11, PRIME);
         verify(cmd, 12, NOT_PRIME);
