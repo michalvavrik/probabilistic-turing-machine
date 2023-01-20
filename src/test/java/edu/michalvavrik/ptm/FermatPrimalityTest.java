@@ -7,30 +7,36 @@ import java.io.IOException;
 
 public class FermatPrimalityTest {
 
+    private static final int PRIME = 1;
+    private static final int NOT_PRIME = 0;
+
     @Test
     void primalityTest() throws IOException {
+        // WARNING: this test is by design flaky as Fermat Primality Test also produce Fermat liars
+        // and because of probabilistic step, the test is not deterministic, therefore sometimes it detects
+        // Fermat witness, and sometimes it does not
         final var cmd = new StartCommand();
         cmd.setTransitionFunction("src/test/resources/fermat-primality-test.txt");
         cmd.converseDecimalToBinary = true;
-        verify(cmd, 3);
-        verify(cmd, 4);
-        verify(cmd, 5);
-        verify(cmd, 6);
-        verify(cmd, 7);
-        verify(cmd, 8);
-        verify(cmd, 9);
-        verify(cmd, 10);
-        verify(cmd, 11);
-        verify(cmd, 12);
-        verify(cmd, 13);
-        verify(cmd, 14);
+        verify(cmd, 3, PRIME);
+        verify(cmd, 4, NOT_PRIME);
+        verify(cmd, 5, PRIME);
+        verify(cmd, 6, NOT_PRIME);
+        verify(cmd, 7, PRIME);
+        verify(cmd, 8, NOT_PRIME);
+        verify(cmd, 9, NOT_PRIME);
+        verify(cmd, 10, NOT_PRIME);
+        verify(cmd, 11, PRIME);
+        verify(cmd, 12, NOT_PRIME);
+        verify(cmd, 13, PRIME);
+        verify(cmd, 14, NOT_PRIME);
     }
 
-    private void verify(StartCommand cmd, int primeCandidate) {
+    private void verify(StartCommand cmd, int primeCandidate, int expected) {
         cmd.setInputData(Integer.toString(primeCandidate));
         final var result = cmd.computeInputData().tape();
         Assertions.assertEquals(1, result.length);
-        Assertions.assertEquals(1, Integer.parseInt(new String(result)));
+        Assertions.assertEquals(expected, Integer.parseInt(new String(result)));
     }
 
 }
