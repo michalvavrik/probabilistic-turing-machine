@@ -1,6 +1,7 @@
 package edu.michalvavrik.ptm;
 
 import edu.michalvavrik.ptm.core.TransitionFunction;
+import edu.michalvavrik.ptm.core.TransitionFunction.Action;
 import edu.michalvavrik.ptm.core.TuringMachine;
 import edu.michalvavrik.ptm.core.TuringMachine.TuringMachineBuilder;
 import org.jboss.logging.Logger;
@@ -15,7 +16,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -23,6 +26,7 @@ import java.util.stream.Stream;
 import static edu.michalvavrik.ptm.core.TuringMachine.ANY;
 import static edu.michalvavrik.ptm.core.TuringMachine.BLANK;
 import static java.lang.String.format;
+import static java.util.Map.entry;
 
 @Command(name = "turing-machine", mixinStandardHelpOptions = true)
 public class StartCommand implements Runnable {
@@ -135,6 +139,13 @@ public class StartCommand implements Runnable {
             # more concrete match has priority
             δ : A × # → B × # × L
             
+            Probabilistic function is defined similarly to its deterministic twin:
+            
+            random δ : A × # → B × # × L
+            random δ : A × # → C × # × L
+            
+            It must not change a symbol the tape head is on.
+            
             """)
     public void setTransitionFunction(String path) throws IOException {
         final List<String> transitionRules = Files.readAllLines(Path.of(path));
@@ -227,10 +238,34 @@ public class StartCommand implements Runnable {
 
             record From(char fromState, char fromSymbol) { }
 
-            private final Map<From, TransitionFunction.Action> transitionMap = parseMap(transitionRules);
+            private final Map<Character, List<Action>> probabilisticStateToActions = parseProbabilisticMap(transitionRules);
+            private final boolean hasProbabilisticTransitionFunctions = probabilisticStateToActions != null;
+            private final Map<From, Action> transitionMap = parseMap(transitionRules);
+
+            private static Map<Character, List<Action>> parseProbabilisticMap(List<String> transitionRules) {
+                final Map<Character, List<Map.Entry<Character, Action>>> map = parseTransitionRules(transitionRules.stream()
+                        .filter(line -> line != null && line.startsWith("random δ"))
+                        .map(line -> line.replace("random ", "")))
+                        .map(entry -> entry(entry.getKey().fromState(), entry.getValue()))
+                        .collect(Collectors.groupingBy(new Function<Map.Entry<Character, Action>, Character>() {
+                            @Override
+                            public Character apply(Map.Entry<Character, Action> characterActionEntry) {
+                                return characterActionEntry.getKey();
+                            }
+                        }));
+                return map.entrySet().stream()
+                        .map(entry -> entry(entry.getKey(), entry.getValue().stream().map(Map.Entry::getValue).toList()))
+                        .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
+            }
+
 
             private static Map<From, Action> parseMap(List<String> transitionRules) {
-                record Parser(From from, TransitionFunction.Action action) {
+                return parseTransitionRules(transitionRules.stream())
+                        .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
+            }
+
+            private static Stream<Map.Entry<From, Action>> parseTransitionRules(Stream<String> transitionRules) {
+                record Parser(From from, Action action) {
                     private static final String SPLIT_BY = "×";
 
                     Parser(String[] arr) {
@@ -239,7 +274,7 @@ public class StartCommand implements Runnable {
 
                     Parser(String[] leftSideSplit, String[] rightSideSplit) {
                         this(new From(checkChar(leftSideSplit, 0), checkChar(leftSideSplit, 1)),
-                                new TransitionFunction.Action(checkChar(rightSideSplit, 0), checkChar(rightSideSplit, 1),
+                                new Action(checkChar(rightSideSplit, 0), checkChar(rightSideSplit, 1),
                                         parseMove(rightSideSplit[2])));
                     }
 
@@ -263,7 +298,6 @@ public class StartCommand implements Runnable {
                 }
 
                 return transitionRules
-                        .stream()
                         .filter(line -> line != null && line.startsWith("δ"))
                         // δ : B × b → B × c × L    =>    B × b → B × c × L
                         .map(line -> line.substring(line.indexOf(":") + 1).trim())
@@ -278,11 +312,32 @@ public class StartCommand implements Runnable {
                             }
                         })
                         .map(Parser::new)
-                        .collect(Collectors.toUnmodifiableMap(Parser::from, Parser::action));
+                        .map(parser -> entry(parser.from(), parser.action()));
             }
 
             @Override
             public Action project(char state, char symbol) {
+                if (hasProbabilisticTransitionFunctions && probabilisticStateToActions.containsKey(state)) {
+                    // this is an analogy to additional tape used by probabilistic turing machines
+                    // usually you would expect to have additional tape with random bits used to decide next state
+                    // however there is no practical difference to using pseudorandom numbers to decide it as below
+                    final var resultCandidates = probabilisticStateToActions.get(state);
+                    if (resultCandidates.isEmpty()) {
+                        throw new IllegalStateException("There must be at least one probabilistic transition function");
+                    }
+                    if (resultCandidates.size() == 1) {
+                        throw new IllegalStateException(String.format("There must be at least 2 probabilistic " +
+                                "transition functions for the state '%s'", state));
+                    }
+                    final var actionIndex = ThreadLocalRandom.current().nextInt(0, resultCandidates.size());
+                    final var action = resultCandidates.get(actionIndex);
+                    if (action.symbol() != symbol && action.symbol() != ANY) {
+                        throw new IllegalStateException("Random transition function must not write symbol as only " +
+                                "state is selected randomly; symbol can be changed in next step");
+                    }
+                    return new Action(action.state(), symbol, action.move());
+                }
+
                 var action = transitionMap.get(new From(state, symbol));
                 if (action == null) {
                     action = transitionMap.get(new From(state, ANY));
@@ -313,8 +368,10 @@ public class StartCommand implements Runnable {
         // extract final states
         fun.transitionMap.values()
                 .stream()
-                .map(TransitionFunction.Action::state)
+                .map(Action::state)
                 .filter(state -> fun.transitionMap.keySet().stream().noneMatch(from -> from.fromState() == state))
+                .filter(state -> fun.probabilisticStateToActions.keySet().stream()
+                        .noneMatch(fromState -> fromState.charValue() == state))
                 .forEach(turingMachineBuilder::addFinalState);
 
         // extract all states
@@ -418,7 +475,8 @@ public class StartCommand implements Runnable {
         return conversed.toString();
     }
 
-    private static int addBinaryNumber(char[] charArr, StringBuilder conversed, int digitStart, int i, AtomicInteger maxBinaryNumberLength) {
+    private static int addBinaryNumber(char[] charArr, StringBuilder conversed, int digitStart, int i,
+                                       AtomicInteger maxBinaryNumberLength) {
         // converse decimal to binary number
         StringBuilder digitAsStr = new StringBuilder();
         for (int j = digitStart; j < i; j++) {

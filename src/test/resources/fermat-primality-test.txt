@@ -1,0 +1,3 @@
+initial-state Ţ
+
+import-subroutine fermat-primality-test.txt

@@ -29,8 +29,17 @@ public class BinaryNumberComparatorTest {
         compareAndVerify(2, 99999, cmd);
         compareAndVerify(2, 90000, cmd);
 
-        // assure when both numbers have multiple leading zeros
         cmd.converseDecimalToBinary = false;
+        cmd.setInputData(Integer.toBinaryString(2) + BLANK + Integer.toBinaryString(4));
+        final var configuration = cmd.computeInputData();
+        assertEquals(NOT_EQUAL_STATE, configuration.state());
+        final var tape = splitBySeparator(configuration.tape(), BLANK);
+        final int leftActual = Integer.parseInt(tape[0], 2);
+        final int rightActual = Integer.parseInt(tape[1], 2);
+        assertEquals(2, leftActual);
+        assertEquals(4, rightActual);
+
+        // assure when both numbers have multiple leading zeros
         cmd.setInputData("00000" + Integer.toBinaryString(1) + BLANK + "00000" + Integer.toBinaryString(0));
         assertEquals(NOT_EQUAL_STATE, cmd.computeInputData().state());
         cmd.setInputData("00000" + Integer.toBinaryString(1) + BLANK + "00000" + Integer.toBinaryString(1));

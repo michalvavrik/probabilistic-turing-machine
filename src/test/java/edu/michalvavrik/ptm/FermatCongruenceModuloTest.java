@@ -8,7 +8,6 @@ import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import java.io.IOException;
 
 import static edu.michalvavrik.ptm.core.TuringMachine.BLANK;
-import static java.lang.String.format;
 
 public class FermatCongruenceModuloTest {
 
@@ -73,17 +72,11 @@ public class FermatCongruenceModuloTest {
     }
 
     private void verify(StartCommand cmd, int base, int exponent) {
-        final String exponentBinary = Integer.toBinaryString(exponent);
-        // add a lot of blanks between congruence and tape symbols we want to store for next computation
-        // exact number of blank symbols required depends on dividend length
-        final String blankSymbols = Character.toString(BLANK).repeat(exponentBinary.length() * 200);
-        // some binary number to verify it is possible to store symbols right to the congruence
-        final String extraBinary = Integer.toBinaryString(25);
-        cmd.setInputData(format("%s#%s%s~%s", Integer.toBinaryString(base), exponentBinary, blankSymbols, extraBinary));
-        var result = new String(cmd.computeInputData().tape()).split(Character.toString('~'));
+        cmd.setInputData(Integer.toBinaryString(base) + BLANK + Integer.toBinaryString(exponent));
+        var result = new String(cmd.computeInputData().tape());
         LOG.debugf("Verify result for base %d, exponent %d", base, exponent);
         final int expected = (Math.pow(base, exponent-1)%exponent) == 1 ? 1 : 0;
-        Assertions.assertEquals(expected, Integer.parseInt(result[0], 2));
+        Assertions.assertEquals(expected, Integer.parseInt(result, 2));
     }
 
 }

@@ -37,8 +37,6 @@
 δ : ř × y → ř × y × L
 δ : ř × − → Œ × − × R
 
-# todo spare state ś, š
-
 # go to the middle separator
 δ : Ŝ × − → Ŝ × − × L
 δ : Ŝ × # → ŝ × # × R
@@ -62,8 +60,8 @@
 # left number is compared (all equal so far), let's assure right number is too (necessary when left < right)
 δ : Œ × # → Ŗ × # × R
 # there should be no 1 and zeros on the right side, therefore numbers are not equal
-δ : Ŗ × 1 → Ŝ × 1 × R
-δ : Ŗ × 0 → Ŝ × 1 × R
+δ : Ŗ × 1 → Ŝ × 1 × N
+δ : Ŗ × 0 → Ŝ × 0 × N
 # right side - turn x to 1 and y to 0
 δ : Ŗ × x → Ŗ × 1 × R
 δ : Ŗ × y → Ŗ × 0 × R

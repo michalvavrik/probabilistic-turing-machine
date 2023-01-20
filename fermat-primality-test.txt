@@ -1,48 +1,40 @@
-# Fermat primality test
+# Fermat primality test with probabilistic search of 'a'
+# domain of the function is n > 2
 
-input data: 65
+# on the tape we expect binary number 'n', for example 10, that should be tested for primality
+# first decrement the number which will help us which selection of 'a'; n -> n-1
+import-subroutine [replace state Û with Ţ and Ü with š and Ý with Ů and Þ with ů] src/main/resources/subroutines/decrement.txt
 
-PLAN:
+# go to the blank symbol next to the left-most digit of the number 'n-1'
+δ : š × − → š × − × L
+δ : š × # → ś × # × L
 
-decrement 65
-64
-add ^
-64^
-copy number
-64^64
-add %
-copy number
-64^64##%64
-@@@@@@ if left side (number on the left of the ^) is not 1; 1 -> exit (make decision), not 1 -> carry below
-copy to distant place so that there is enough space for computation
-64^64##%64#########################################################################################64^64##%64
-apply power subroutine to the left 64^64##%64
-result is 3.940201e+115##%64########################################################64^64##%64
-that means power must copy to the left
-than if result is one, delete the number and then go to the right till you reach the number
-decrement first number (before ^)
-continue with @@@@@@
+# write 2 next to the 'n-1' (here, next to the 9), e.g. 2#9; 2 represents minimal 'a' here
+δ : ś × # → Ŧ × 0 × L
+δ : Ŧ × # → Ũ × 1 × N
 
+# probabilistic transition function - choose what's next
 
-2#3##~100110
+## option 1: increment right number (n-1 -> n) and continue to modulo
+random δ : Ũ × − → ū × − × N
+### go to the 'n'
+δ : ū × − → ū × − × R
+δ : ū × # → ũ × # × R
+### 'n-1' -> 'n' and continue to congruence (Ī is congruence entry state)
+import-subroutine [replace state Ŏ with ũ and Ő with ű] src/main/resources/subroutines/increment.txt
+### go to the left-most digit of the 'a'
+δ : ű × # → Ű × # × L
+δ : Ű × − → Ű × − × L
+δ : Ű × # → Ī × # × R
 
-accepts n
-choose random a lesser than n and greater than 2
+## option 2: iff a == n-1, continue with option 1, otherwise increment 'a' and choose again (recursion)
+random δ : Ũ × − → Œ × − × N
+import-subroutine src/main/resources/subroutines/binary-number-comparator.txt
+### a == n-1, therefore continue with option 1
+δ : Ś × − → ū × − × N
+### a < n-1, increment 'a' and choose between option 1 and 2 again
+import-subroutine [replace state Ŏ with Š and Ő with Ũ and ŏ with Ŭ and ő with ŭ] src/main/resources/subroutines/increment.txt
 
-algorithm:
-- start on 2
-- choose probabilistic transition function - either increment or continue to modulo
- - if equal to n-1 go to modulo, otherwise increment (recursion)
- - continue to modulo
-- modulo
-
-1. write number
-101011101
-2. decrement it (to n-1)
-3. add 2
-101011101#10
-4. probabilistic step - choose one of:
- - continue to modulo
- - (compare) if equal to n-1 continue to modulo, otherwise increment and run 4.
-
-# todo spare state Ţ
+## congruence a^(n-1) ≡ 1 (mod n)
+## boolean algebra: result is 1 if n is prime or Fermat pseudoprime and 0 if n is Fermat witness (n is not prime number)
+import-subroutine src/main/resources/subroutines/fermat-congruence-modulo.txt
