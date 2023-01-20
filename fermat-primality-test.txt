@@ -23,6 +23,8 @@ random δ : Ũ × − → ū × − × N
 ### 'n-1' -> 'n' and continue to congruence (Ī is congruence entry state)
 import-subroutine [replace state Ŏ with ũ and Ő with ű] src/main/resources/subroutines/increment.txt
 ### go to the left-most digit of the 'a'
+δ : ű × 1 → ű × 1 × L
+δ : ű × 0 → ű × 0 × L
 δ : ű × # → Ű × # × L
 δ : Ű × − → Ű × − × L
 δ : Ű × # → Ī × # × R
