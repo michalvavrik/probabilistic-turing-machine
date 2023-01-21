@@ -4,7 +4,7 @@
 initial-state Ţ
 
 # on the tape we expect binary number 'n', for example 10, that should be tested for primality
-# first decrement the number which will help us which selection of 'a'; n -> n-1
+# first decrement the number which will help us with selection of 'a'; n -> n-1
 import-subroutine [replace state Û with Ţ and Ü with š and Ý with Ů and Þ with ů] src/main/resources/subroutines/decrement.txt
 
 # go to the blank symbol next to the left-most digit of the number 'n-1'
@@ -40,5 +40,5 @@ import-subroutine src/main/resources/subroutines/binary-number-comparator.txt
 import-subroutine [replace state Ŏ with Š and Ő with Ũ and ŏ with Ŭ and ő with ŭ] src/main/resources/subroutines/increment.txt
 
 ## congruence a^(n-1) ≡ 1 (mod n)
-## boolean algebra: result is 1 if n is prime or Fermat pseudoprime and 0 if n is Fermat witness (n is not prime number)
+## boolean algebra: result is 1 if n is prime or Fermat pseudoprime and 0 if n is Fermat witness (n is not a prime number)
 import-subroutine src/main/resources/subroutines/fermat-congruence-modulo.txt
